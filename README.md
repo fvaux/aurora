@@ -1,1 +1,2 @@
-# aurora
+# Summary
+‘Aurora’ is a free, open-source laboratory information management system (LIMS), which operates as an application using R, R Shiny and RStudio. Aurora is focused on the tracking and management of biological samples used for genetics research, but the application can be modified by users for any sample-based purpose. Aurora operates as a relational database, where all data is linked to a primary key: the sample accession. New samples can be imported using a Microsoft Excel file, and searching, editing and exporting data, and generating reports is straightforward within Aurora’s graphical user interface. Aurora uses a small number of clearly annotated R scripts, and with modest knowledge of the R language, users can easily customise the application.
