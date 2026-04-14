@@ -1,11 +1,11 @@
 # dashboardfunctions.R
-# Aurora App — Dashboard tab helper functions
+# Aurora App — Dashboard page helper functions
 # Grant Abernethy & Felix Zareie-Vaux
 # Date: 2025-08-06
 
 #' Dashboard helper functions
 #'
-#' Internal helper functions used by the Aurora Dashboard tab.
+#' Internal helper functions used by the Aurora Dashboard page.
 #' These functions prepare cumulative datasets, generate Plotly
 #' visualisations, and create summary tables used throughout the
 #' dashboard interface.
@@ -14,12 +14,12 @@
 NULL
 
 # Helper: Prepare cumulative counts for a given table and date column ====
-# Used by dashboard and timeline tabs
+# Used by dashboard and timeline pages
 #' Prepare cumulative counts for a given table and date column
 #'
 #' Creates a cumulative count dataset based on a specified date column.
 #' This helper is used to generate accumulation plots in both the
-#' dashboard and timeline tabs.
+#' dashboard and timeline pages.
 #'
 #' @param data Data frame containing a `sample_accession` column and
 #'   a date column.

@@ -1,10 +1,10 @@
 # bulk_edit_functions.R
-# Aurora App — Bulk Edit tab helper functions
+# Aurora App — Bulk Edit page helper functions
 # Grant Abernethy & Felix Zareie-Vaux
 # Date: 2025-08-06
 #
 # This is an R script for the Aurora application
-# It contains helper functions used by the Bulk Edit tab to export
+# It contains helper functions used by the Bulk Edit page to export
 # and import Aurora data tables for external editing in CSV format.
 
 

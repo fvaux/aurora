@@ -1,11 +1,11 @@
 # timelinefunctions.R
-# Aurora App — Timeline tab helper functions
+# Aurora App — Timeline page helper functions
 # Grant Abernethy & Felix Zareie-Vaux
 # Date: 2025-10-17
 
 #' Timeline helper functions
 #'
-#' Internal helper functions used by the Timeline tab of the Aurora Shiny app.
+#' Internal helper functions used by the Timeline page of the Aurora Shiny app.
 #'
 #' These functions generate timeline datasets and Plotly visualisations.
 #'

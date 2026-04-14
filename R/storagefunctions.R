@@ -6,7 +6,7 @@
 
 #' Storage helper functions
 #'
-#' Internal helper functions used by the Storage tab of the Aurora Shiny app.
+#' Internal helper functions used by the Storage page of the Aurora Shiny app.
 #'
 #' These functions help to track the storage of samples and nucleic acid extractions.
 #'

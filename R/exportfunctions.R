@@ -1,5 +1,5 @@
 # exportfunctions.R
-# Aurora App — Export tab helper functions
+# Aurora App — Export page helper functions
 # Grant Abernethy & Felix Zareie-Vaux
 # Date: 2025-08-06
 
@@ -7,7 +7,7 @@
 
 #' Export helper functions
 #'
-#' Internal helper functions used by the Export tab of the Aurora Shiny app.
+#' Internal helper functions used by the Export page of the Aurora Shiny app.
 #'
 #' These functions gather and export data in different formats.
 #'

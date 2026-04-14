@@ -43,24 +43,24 @@ shinyApp(ui = ui, server = server) # Run this command to launch the Aurora app
 
 ## bslib theme ====
 # Change to bslib theme <-- PAUSED
-# 🚨 Have tried this, but rending of side panel (e.g. filtering options) on Filter tab is failing under bslib
+# 🚨 Have tried this, but rending of side panel (e.g. filtering options) on Filter page is failing under bslib
 # Don't want to fix with CSS overrides
-# ⚠️ When bslib applied, use sidebarLayout to render table parallel with sidebar on Search and Edit tabs (works once implemented)
+# ⚠️ When bslib applied, use sidebarLayout to render table parallel with sidebar on Search and Edit pages (works once implemented)
 
-## Move boxes tab ====
-# Replace with 'batch edit' tab
+## Move boxes page ====
+# Replace with 'batch edit' page
 
-## Geography tab ====
+## Geography page ====
 # Move summary table production to geographyfunctions.r?
 
 # Add drop-down menu for changing colours of points on map? (red, orange, yellow, green, cyan, blue, black, white)
 
-## Report tab and reports ====
-# Finish Report tab (pivot summary table, general table, map, timeline)
+## Report page and reports ====
+# Finish Report page (pivot summary table, general table, map, timeline)
 
-# Search tab function to restrict data in other edits <-- DONE - using Filter Tab
+# Search page function to restrict data in other edits <-- DONE - using Filter page
 # Report needs to use "report_data" <-- DONE
-# Users select samples using filter tab <-- DONE
+# Users select samples using filter page <-- DONE
 # "report_table" saves that search to global <-- DONE
 # Need separate R files for plotly functions <-- DONE
 # UI to select markdown template (has to be a test if plot is null, go and make it) <-- DONE

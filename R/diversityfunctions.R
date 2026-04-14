@@ -1,11 +1,11 @@
 # diversityfunctions.R
-# Aurora App — Diversity tab helper functions
+# Aurora App — Diversity page helper functions
 # Grant Abernethy & Felix Zareie-Vaux
 # Date: 2025-08-06
 
 #' Diversity helper functions
 #'
-#' Internal helper functions used by the Diversity tab of the Aurora Shiny app.
+#' Internal helper functions used by the Diversity page of the Aurora Shiny app.
 #'
 #' These functions help to track and evaluate the taxonomic diversity of samples.
 #'

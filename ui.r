@@ -32,9 +32,9 @@ ui <- fluidPage(
   # Main tabsetpanel ============================
   tabsetPanel(
     # Launch ============================
-    # This it the launch/splash page tab, when the Aurora app is first opened
+    # This it the launch/splash page page, when the Aurora app is first opened
     # Launch contains information to explain the app to users
-    # The tab also contains a toggle to switch between user data and the example data
+    # The page also contains a toggle to switch between user data and the example data
     tabPanel(
       "Launch",
       h3("Welcome to Aurora! 🐧"), # Penguin is a reference to SY Aurora (see FAQs)
@@ -52,7 +52,7 @@ ui <- fluidPage(
               value   = FALSE,
               status  = "warn"
             ),
-            p("If other tabs have been used prior to changing data, refresh them by selecting a button or preparing data"),
+            p("If other pages have been used prior to changing data, refresh them by selecting a button or preparing data"),
             p("Turning this toggle off and on will also refresh data without relaunching the app")
           )
         ),
@@ -60,7 +60,7 @@ ui <- fluidPage(
           6,
           wellPanel(
             style = "background-color: #d7ecfc",
-            h4("Credits"),
+            h4("Contributors and credit"),
             p("Developed by Grant Abernethy and Felix Zareie-Vaux"),
             strong("Please cite this paper for the Aurora app:"),
             br(),
@@ -82,24 +82,25 @@ ui <- fluidPage(
             h4("About Aurora"),
             p("Aurora is a free, open-source laboratory information management system (LIMS), which operates using R, R Shiny and RStudio. The default version of the software is focused on the tracking and management of biological samples used for genetics research, but the app can be modified for any sample-based purpose."),
             strong("How it works ⚙️"),
-            p("Aurora operates as a relational database, where all data is linked to a primary key: the sample accession. All entries require a sample accession, and it must be unique. There are dozens of other, optional fields (or columns) to record sample information. Aurora is designed to accommodate a very broad range of sample types. These fields are divided into several data tables (or data frames) that are managed separately. The division of these data tables reflects different aspects of sample information (e.g. classification or provenance) or stages of a laboratory workflow (e.g. sample storage, nucleic acid extraction, or sequencing)."),
-            p("Samples are usually imported by uploading rows from a Microsoft Excel file, 'aurora_queue.xlsx', using the matching 'Upload' tabs in that file and the app. Samples can also be manually added using the app’s Edit tab, or by bulk importing data using the Bulk Edit tab (caution advised)."),
-            p("When data is uploaded, the app conducts many formatting checks and provides warnings if there are errors (e.g. duplicate rows). The app conducts multiple automatic backups and ‘munge-proofing’ steps. Data is saved locally within the Aurora app’s folder. Permanent RDS files store all data as characters, and when launched, the app loads data into memory and transforms certain columns into appropriate formats (e.g. numeric)."),
-            p("To avoid repetition and laborious editing, high-level taxonomic information (e.g. kingdom, phylum) is managed in another Excel file, 'taxonomy_source.xlsx', which acts as a reference table. Users can manually edit that taxonomic information, and we have provided utility R code if users want to retrieve data from GBIF."),
-            p("Aurora operates using a small set of R Scripts and it only requires around a dozen commonly used R packages. Within RStudio, Aurora can be run within an R Studio window or run externally within a web browser. R is a powerful programming language for manipulating large data frames, making it highly suitable for a LIMS. The perennial popularity of R means that Aurora is likely to have considerable longevity. While Aurora is a Shiny web application, it is offline and does not attempt to connect with the internet or other databases."),
+            p("Aurora operates as a relational database, where data for each sample is linked to a unique sample accession. Beyond that mandatory identifier field, there are numerous optional fields to record information. These fields are organised and managed across 10 tables (Figure 1). The first five tables record direct sample information: tracking, classification, detail, provenance, and storage. Four tables focus on DNA and RNA research from samples: extraction, PCR, library preparation, and sequencing. A short, final table records information for publications associated with samples, which is mainly relevant for taxonomic research involving type specimens. "),
             strong("Using Aurora 👨🏼‍🔬💻👩🏽‍🔬"),
-            p("The same instance of an Aurora app (and its database) can be accessed and edited simultaneously by multiple users. To achieve this, Aurora’s files folder and files must be saved in a shared location and each user must have R, R Shiny and R Studio installed with the required packages. Once set up, users can create desktop short-cuts to launch the app outside of RStudio."),
-            p("Users can generally edit at the same time, although edits to the exact same table (or sample), or bulk edits, may cause changes to be overwritten. Users can also edit the aurora_queue.xlsx file simultaneously if permitted under local Excel or One Drive settings, and a laboratory workflow can be separated across Excel tabs to reduce editor conflicts (e.g. sample intake > DNA extraction > sequencing > pre-upload > upload > manual backup)."),
+            p("Typically, users begin by entering data into fields using the ‘aurora_queue.xlsx’ Excel file (Figure 2). Aside from the sample accession, all fields are optional and users can arrange (and delete) columns in the Excel spreadsheet as they please. The Excel file has multiple tabs, so that users can progress samples along a laboratory workflow until they are ready for upload (e.g. sample intake > DNA extraction > PCR > sequencing > pre-upload > upload). That approach is particularly useful when separate personnel hand-over different stages of a laboratory workflow. The Excel file includes a data glossary and prompts for most fields, as well as a tab with ~500 rows of example data. When samples are ready to be imported into Aurora, users copy rows to the Upload tab, and we recommend appending those rows to the Manual backup tab as well."),
+            p("To launch Aurora, users must have R, Shiny and RStudio installed with the required R packages (that can be saved within a user’s R library). Aurora uses around a dozen, popular packages [@Shiny, @tidyverse, @lubridate, @DT, @rmarkdown, @readxl, @shinyWidgets, @knitr, @kableExtra, @shinytoastr, @plotly, @leaflet, @htmlwidgets, @writexl, @glue]. Under RStudio settings, Aurora can be opened within an internal window or an externally a web browser. Aurora needs to be saved in a shared file location to enable database sharing and simultaneous editing. Local settings (e.g. Excel and OneDrive) may be required to enable simultaneous editing of the aurora_queue.xlsx file."),
+            p("Once Aurora has been launched from RStudio, users import samples from aurora_queue.xlsx using the Upload page. Aurora automatically creates back-ups of the database and the Excel file, and it checks formatting and provides warnings if there are any issues. Alternatively, samples can be added manually using buttons and Excel-like functionality on the Edit page."),
+            p("All data is saved locally within the Aurora application’s folders, and Aurora does not connect with the internet of any external databases. Permanent RDS files store all data as characters, and when launched, Aurora loads data into memory and transforms certain fields into appropriate formats (e.g. numeric). "),
+            p("Users can edit data in Aurora using the Edit page. That page includes functions to identify and remove potential duplicate entries. The Batch Edit page can be used to change values for a group of specimens (e.g. updating a storage box or taxonomic name). The Bulk Edit page can be used to export and re-import an entire table for editing outside of Aurora. Users can edit different tables within the database at the same time (e.g. Sample Detail and Sample Storage), but simultaneous edits to the same table, or bulk import/exports of the same table, may cause changes to be overwritten."),
+            p("Users can explore the database and search for samples or groups using the Search page. The Dashboard provides tables and interactive figures that track database size and sample accumulation over time, which can be used to assess database integrity (e.g. checking whether the correct number of samples have been added after an upload). A toggle on the Launch page allows users to switch to the example dataset."),
+            p("The entire database can be exported in RDS and .csv formats on the Export page. Aurora can be used to generate lists and reports for any set of samples. On the Filter page, users select samples and the subsequent Storage, Diversity, Geography, and Timeline provide interactive tables and figures for those samples. The Report page enables users to export those tables and figures within an interactive html file, and tables can also be exported as Excel files. These reporting features are designed for practical laboratory management, such as printing lists of freezer contents during an audit or defrost, sharing sequencing progress for a particular project, or mapping the location of samples belonging to a particular genus."),
+            p("To avoid repetitive data entry and editing, high-level taxonomic information (e.g. kingdom, phylum) is managed in another Excel file, 'taxonomy_source.xlsx'. Users can manually edit that reference table to update taxonomic information for samples. If desired, we have provided a utility R code to retrieve information from the Global Biodiversity Information Facility (GBIF)."),
             strong("Customising Aurora ✨"),
-            p("Since Aurora is open-source using R and R Shiny, any user competent with R can edit their version of the app freely. Users may want to add or remove columns or data tables, change export formats, produce new tabs or visualisations, or add security features."),
-            p("Aurora is shared on GitHub with versions released using Zenodo. All of the R scripts are thoroughly annotated. To aid users, the launch page of Aurora includes answers to a list of frequently asked questions.️️️"),
+            p("We encourage users familiar with R to customise Aurora. All of the R scripts are well-annotated and the Launch page answers frequently asked questions. Adding new columns or tables only requires a few changes that are flagged in annotations."),
             br(),
-            h4("Data management in Aurora"),
-            p("The diagram below shows an entity relationship diagram for Aurora. The different Data Tables are illustrated with colours matching the column header shading in the the aurora_queue.xlsx file. The numbers for Data Tables indicate their order in the Aurora Excel file. The taxonomy source table, managed in the taxonomy_source.xlsx file, is shown with a dashed boarder to indicate its separate, look-up relationship."),
+            h4("Figure 1. Data management in Aurora"),
+            p("An entity relationship diagram illustrating the ten tables within the Aurora database structure. Colours match the column header shading in the aurora_queue.xlsx file, and numbers indicate their order. The taxonomy source table, managed in the taxonomy_source.xlsx file, is shown with a dashed border."),
             img(src = "AuroraEntityRelationships.png", style = "max-width: 100%; height: auto; display: block; margin: auto;"),
             br(),
-            h4("Data flow and editing in Aurora"),
-            p("The illustration below indicates how data flows in and out of Aurora, and how data can be edited."),
+            h4("Figure 2. Data flow in Aurora"),
+            p("An illustration showing how data flows in and out of Aurora for upload, editing, export and reporting."),
             img(src = "AuroraDataFlow.png", style = "max-width: 75%; height: auto; display: block; margin: auto;")
           )
         ),
@@ -131,7 +132,7 @@ ui <- fluidPage(
             p("Genus and species (i.e. the specific epithet) are uploaded separately, and Aurora automatically creates a binomial species column. This approach prevents extra spaces (etc.) in species names. The default version of Aurora does not keep track of taxonomic authorities."),
             p("High level taxonomic information (e.g. kingdom, phylum) is managed in a second Excel file: taxonomy_source.xlsx (located in the Taxonomy folder). This reference table is used to match high level taxonomic information to specimens with species, genus or family information. By using this reference table, Aurora reduces repetitive data entry and reduces opportunity for typos."),
             p("Users should update taxonomy_source.xlsx with new taxa as they are added to the database. Users can also add new columns for additional taxonomic levels as required (e.g. subphylum, infraclass or tribe). Users may want to retrieve taxonomic data from GBIF: we have provided code in the utility.r script to gather such data, and provided a large set of records in the taxonomy_GBIF.xlxs file."),
-            p("High level taxonomic data does not appear in the Search and Edit tabs, since it is managed via the reference table. These fields can be exported though."),
+            p("High level taxonomic data does not appear in the Search and Edit pages, since it is managed via the reference table. These fields can be exported though."),
             strong("What do the storage columns like 'unit' mean? 📦"),
             p("Aurora provides five hierarchical levels for storing samples and extractions:"),
             tags$ul(
@@ -143,7 +144,7 @@ ui <- fluidPage(
               tags$li("Plate: plate (e.g. tissue or PCR plate) or page within box"),
               tags$li("Well: plate well or position of sample/extraction in box or page")
             ),
-            p("Units, shelves, racks, boxes and plates should have unique names to avoid confusion (the Storage tab can help reveal errors). Since shelves are nested within units (e.g. freezer shelves), their names should indicate these relationships."),
+            p("Units, shelves, racks, boxes and plates should have unique names to avoid confusion (the Storage page can help reveal errors). Since shelves are nested within units (e.g. freezer shelves), their names should indicate these relationships."),
             p("The aurora_queue.xlsx file contains further information to explain all storage and extraction columns, and the example data illustrate different use cases."),
             strong("What's the difference between the extraction, PCR, library preparation, and sequencing tables? 🧮"),
             p("These tables follow the standard workflow of a genetics lab. Some columns are similar between the PCR and Library Preparation tables, but it is important to separate them as PCR is often used for screening samples prior to sequencing, and not all PCR testing needs subsequent sequencing."),
@@ -165,11 +166,11 @@ ui <- fluidPage(
             p("Yes, Aurora keeps multiple automatic backups in the Autobackups folder:"),
             tags$ul(
               tags$li("Aurora keeps track of the most recent save date and automatically backs up all data as a single, date-stamped .rds file if the most recent save is >2 days old"),
-              tags$li("After >7 days, all abandoned samples (from the Edit tab) are backed up"),
+              tags$li("After >7 days, all abandoned samples (from the Edit page) are backed up"),
               tags$li("On launch the app backs up the aurora_queue and taxonomy_source Excel files (one save per day)"),
-              tags$li("On every upload from the aurora_queue.xlsx file (via the Upload tab), the app also creates a .csv backup of the uploaded entries"),
+              tags$li("On every upload from the aurora_queue.xlsx file (via the Upload page), the app also creates a .csv backup of the uploaded entries"),
             ),
-            p("We also recommend users periodically make manual backups of their Aurora app files (particularly if editing code) and use the 'Manual backup' tab in the aurora_queue.xlsx. Users can also export data via the Export or Bulk Edit tabs."),
+            p("We also recommend users periodically make manual backups of their Aurora app files (particularly if editing code) and use the 'Manual backup' page in the aurora_queue.xlsx. Users can also export data via the Export or Bulk Edit pages."),
             strong("How are dates managed? 📅"),
             p("Dates are uploaded in the aurora_queue.xlsx file using separate year, month and day columns. The Aurora app uses these columns to create a new date column with a standardised YYYY-MM-DD format (saved as characters). The separate year, month and day columns are retained but are listed last in each table. If any information is missing, the app fills in the gaps using the current year and 1st January. This approach permits missing data information and avoids date formatting errors (including automated changes in Excel)."),
             p("Dates should be updated using the separate year, month and day columns. Date columns will be automatically updated when the app is launched."),
@@ -179,9 +180,9 @@ ui <- fluidPage(
             strong("What is munge-proofing? 🧹"),
             p("When data is uploaded, Aurora conducts several 'munge-proofing' or transforming steps to prevent poorly formatted data (e.g. extra spaces or commas, and ways to handle missing data/NAs). When data is saved, it is kept in a 'munge-proof' format that inserts an underscore (_) before characters to prevent formatting errors. All data is saved as characters. When the app is launched, it loads the data into memory and transforms such columns into appropriate formats (e.g. numeric). Edits in memory can be sent back to the permanent files, which includes munge-proofing."),
             strong("What are the example data? 🦠🐟🦒"),
-            p("Aurora and the aurora_queue.xlxs file are provided with >500 entries of fictitious example data. The example data indicate how fields, tables and tabs within the app can be used, and it can be useful for testing during app development."),
+            p("Aurora and the aurora_queue.xlxs file are provided with >500 entries of fictitious example data. The example data indicate how fields, tables and pages within the app can be used, and it can be useful for testing during app development."),
             p("Users can switch between user data and example data using the toggle on this page. Example data .RDS files are stored in a separate directory."),
-            p("A copy of the example data is stored as a tab in the Aurora Excel file. If desired, that example data can be uploaded into Aurora and saved in the normal .RDS file location."),
+            p("A copy of the example data is stored as a page in the Aurora Excel file. If desired, that example data can be uploaded into Aurora and saved in the normal .RDS file location."),
             strong("How do I report an error with Aurora? 🚨"),
             p("Please raise a new issue in Aurora's GitHub repository (linked the to Zenodo archive)."),
             strong("How can I share my own customised version of Aurora? 🛠️"),
@@ -234,8 +235,8 @@ ui <- fluidPage(
     ),
 
     # Edit ============================
-    # This tab is used to edit samples across Data Tables
-    # Tab can also be used to add or abandon/delete samples
+    # This page is used to edit samples across Data Tables
+    # page can also be used to add or abandon/delete samples
     tabPanel(
       "Edit",
       sidebarPanel(
@@ -245,7 +246,7 @@ ui <- fluidPage(
           selected = "Sample Tracking"
         ),
         hr(style = "border-color: #3B71C5"),
-        p("📅 Change dates using year, month and day columns. Dates will automatically update when app is relaunched or data is toggled on the Launch tab."),
+        p("📅 Change dates using year, month and day columns. Dates will automatically update when app is relaunched or data is toggled on the Launch page."),
         hr(style = "border-color: #3B71C5"),
         actionBttn("addRowEdit",
           label = "Add Row",
@@ -368,7 +369,7 @@ ui <- fluidPage(
     ),
     
     # Move Boxes ============================
-    # This tab is for moving or renaming boxes
+    # This page is for moving or renaming boxes
     tabPanel(
       "Move Boxes (WIP)",
       br(),
@@ -446,7 +447,7 @@ ui <- fluidPage(
 
     # Bulk Edit ============================
     # Used to export and import each Data Table .rds file for manual bulk editing in Excel or a text editor
-    # See Edit tab for editing smaller numbers of samples more safely
+    # See Edit page for editing smaller numbers of samples more safely
     tabPanel(
       "Bulk Edit",
       h3("Bulk edit"),
@@ -454,7 +455,7 @@ ui <- fluidPage(
         column(
           6,
           wellPanel(
-            p("Use this tab to export (and re-import) selected Data Tables as files for manual bulk editing in Excel or a text editor."),
+            p("Use this page to export (and re-import) selected Data Tables as files for manual bulk editing in Excel or a text editor."),
             p("High level taxonomic information should be edited in the taxonomy_source.xlsx file - there's no need to bulk edit that data."),
             p("⚠️ Note that another user might save changes in Aurora in the meantime, causing edits to be overwritten. Notify other active users before conducting bulk edits."),
             radioButtons("UtilscheckGroup",
@@ -488,7 +489,7 @@ ui <- fluidPage(
     ),
     
     # Upload ============================
-    # This tab is used to upload/import samples from the 'Upload' tab in the aurora_queue.xlsx file
+    # This page is used to upload/import samples from the 'Upload' page in the aurora_queue.xlsx file
     tabPanel(
       "Upload",
       h3("Upload data"),
@@ -497,8 +498,8 @@ ui <- fluidPage(
           6,
           wellPanel(
             p("Upload data from the aurora_queue.xlsx file"),
-            p("(Samples are taken from the 'Upload' tab in that Excel spreadsheet, found in the Upload folder)"),
-            p("Newly uploaded files should appear automatically. You may need to refresh a tab by pressing a button."),
+            p("(Samples are taken from the 'Upload' page in that Excel spreadsheet, found in the Upload folder)"),
+            p("Newly uploaded files should appear automatically. You may need to refresh a page by pressing a button."),
             br(),
             actionBttn("Upload",
               label = "Upload",
@@ -511,9 +512,9 @@ ui <- fluidPage(
             br(),
             h4("If Upload fails... ⚠️"),
             tags$ul(
-              tags$li("Failure may be due to duplicates in the sample tracking table. To check, use Duplicates Mode on the Edit Table tab in the Aurora app. Then abandon any duplicates, save, and restart Aurora and re-attempt upload."),
-              tags$li("If there are no duplicates, check if the Upload tab in the aurora_queue.xlsx file has traces of data below your new samples (e.g. entries in lower rows in Excel - potentially with hidden characters)."),
-              tags$li("You can also check the Dashboard tab to investigate if data has been added (or removed).")
+              tags$li("Failure may be due to duplicates in the sample tracking table. To check, use Duplicates Mode on the Edit Table page in the Aurora app. Then abandon any duplicates, save, and restart Aurora and re-attempt upload."),
+              tags$li("If there are no duplicates, check if the Upload page in the aurora_queue.xlsx file has traces of data below your new samples (e.g. entries in lower rows in Excel - potentially with hidden characters)."),
+              tags$li("You can also check the Dashboard page to investigate if data has been added (or removed).")
             ),
           )
         )
@@ -604,7 +605,7 @@ ui <- fluidPage(
 
     # Filter data ============================
     # Used to prepare and filter data (i.e. generates report_data)
-    # report_data then used by storage, diversity, geography, timeline and report tabs
+    # report_data then used by storage, diversity, geography, timeline and report pages
     tabPanel(
       "Filter",
       h3("Filter report data"),
@@ -614,8 +615,8 @@ ui <- fluidPage(
             3,
             wellPanel(
               p("Filter and select data for Reporting"),
-              p("The Filter tab provides data for the Storage, Diversity, Map and Report tabs, which are used to generate reports. None of these tabs edit the actual Aurora database."),
-              p("⚠️ Use the Export tab to export full data from Aurora"),
+              p("The Filter page provides data for the Storage, Diversity, Map and Report pages, which are used to generate reports. None of these pages edit the actual Aurora database."),
+              p("⚠️ Use the Export page to export full data from Aurora"),
               actionBttn("generateReportData",
                 label = "Load data for reporting",
                 size = "sm",
@@ -885,7 +886,7 @@ ui <- fluidPage(
     # Report ======================================
     # Used to export reports using report_data
     # Reports can be interactive .html reports, Excel files or .html maps files
-    # This is for exporting reports, for data export - see Export tab
+    # This is for exporting reports, for data export - see Export page
     tabPanel(
       "Report",
       h3("Produce reports"),

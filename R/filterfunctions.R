@@ -2,7 +2,7 @@
 # Grant Abernethy & Felix Zareie-Vaux
 # Date: 2025-10-16
 #
-# Holds helper functions for the "Filter data" tab of the Aurora app.
+# Holds helper functions for the "Filter data" page of the Aurora app.
 # This version reuses generate_export_data() to ensure all joins and date fields
 # are consistent with export outputs.
 

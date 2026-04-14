@@ -6,7 +6,7 @@
 
 #' Geography helper functions
 #'
-#' Internal helper functions used by the Geography tab of the Aurora Shiny app.
+#' Internal helper functions used by the Geography page of the Aurora Shiny app.
 #'
 #' These functions help plot the spatial distribution of samples on maps.
 #'

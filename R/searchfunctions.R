@@ -98,7 +98,7 @@ report_cols <- function(search_tables, table_mapping, select_cols = NULL,
 #' @param search_tables Character vector specifying the tables selected
 #' by the user.
 #' @param constants List containing configuration objects including
-#' column definitions (`tab.cols`) and default column selections
+#' column definitions (`page.cols`) and default column selections
 #' (`default.cols`).
 #'
 #' @return A list containing two elements:
@@ -110,7 +110,7 @@ report_cols <- function(search_tables, table_mapping, select_cols = NULL,
 #'
 #' @details
 #' The function aggregates column definitions across the selected tables
-#' using the metadata stored in `constants$tab.cols` and
+#' using the metadata stored in `constants$page.cols` and
 #' `constants$default.cols`.
 #'
 #' If no tables are selected, the function returns placeholder empty
@@ -127,12 +127,12 @@ get_column_choices <- function(search_tables, constants) {
     return(list(all = c(""), default = c("")))
   }
   
-  col_all <- constants$tab.cols[[search_tables[1]]]
+  col_all <- constants$page.cols[[search_tables[1]]]
   col_default <- constants$default.cols[[search_tables[1]]]
   
   if (len > 1) {
     for (i in search_tables[2:len]) {
-      col_all <- c(col_all, constants$tab.cols[[i]])
+      col_all <- c(col_all, constants$page.cols[[i]])
       col_default <- c(col_default, constants$default.cols[[i]])
     }
   }

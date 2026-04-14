@@ -19,7 +19,7 @@ suppressPackageStartupMessages({
   library(leaflet) # For interactive maps
   library(htmlwidgets) # For exporting html reports
   library(glue) # For string formatting - used for for exporting html reports
-  library(tools) # For filtering on Filter tab (is a base R package but need to load)
+  library(tools) # For filtering on Filter page (is a base R package but need to load)
   library(writexl) # For writing Excel reports
   #library(quarto) # For exporting html reports
 })
@@ -37,7 +37,7 @@ filepath <- "./RDataFiles/" # File path for the Data Table .rds files and other 
 examplepath <- "./exampledata/"
 mungepath <- "./mungeproofed_csvs/"
 srqpath <- "./Upload/aurora_queue.xlsx" # Location of the Aurora MS Excel file used for uploading samples
-srqsheet <- "Upload" # The name of the aurora_queue.xlsx tab used for the sample upload
+srqsheet <- "Upload" # The name of the aurora_queue.xlsx page used for the sample upload
 taxonomypath <- "./Taxonomy/taxonomy_source.xlsx" # Location of the taxonomy source table used for broad-level taxonomic information
 exportpath <- "./Export/" # File path for exported data
 reportpath <- "./Reports/" # _sFile path for reports
@@ -62,7 +62,7 @@ table_mapping <- c(
 
 # Define columns ============================
 # default.cols defines the default sorting of columns/fields within each Data Table
-# Sorting used here is default sorting shown in app's tables (e.g. Search and Edit tabs)
+# Sorting used here is default sorting shown in app's tables (e.g. Search and Edit pages)
 # ⚠️ Users can change the order of columns here to customise their version of the app
 # ⚠️ New Data Tables and columns should be listed here (also need adding to the aurora_queue.xlsx file)
 default.cols <- list(
@@ -84,19 +84,19 @@ loadprimarydata(table_mapping, filepath)
 
 # Manage columns ============================
 ## Get column names ============================
-# Create lists of columns per table (tab.cols), and overall list of all columns (template.cols) and default cols
+# Create lists of columns per table (page.cols), and overall list of all columns (template.cols) and default cols
 # ⚠️ New columns not defined in the default mapping (above) will still be read here
-tab.cols <- list()
+page.cols <- list()
 template.cols <- NULL
 
 for (i in names(table_mapping)) {
-  tab.cols[[i]] <- colnames(get(table_mapping[i]))
+  page.cols[[i]] <- colnames(get(table_mapping[i]))
   # bind_rows also removes duplicate names as a side effect; but creates a tibble
   template.cols <- bind_rows(template.cols, get(table_mapping[i])[0, ])
 }
 
 ## Special needs  ============================
-# Define columns for special needs search cases in Search tab
+# Define columns for special needs search cases in Search page
 # 'Special needs' are pre-selected searches using particular columns across the Data Tables
 # e.g. columns to find a specimen in storage or to check the identity of a specimen
 # ⚠️ Users can add and modify special need cases here
@@ -108,7 +108,7 @@ sp_needs5 <- c("sample_accession", "project", "access", "access_note", "sample_p
 sp_needs6 <- c("sample_accession", "species_binomial", "subspecies", "variety", "serotype", "presumptive_id", "confirmed_id", "classification_method", "presumptive_method", "confirmation_method", "gn_classifier1", "gn_classifier2", "gn_classifier3")
 
 # Create a map of sp_needs empty tibbles, which will map to the sp_case input widget
-# ⚠️ Modify this section to change the special need cases listed in the app's Search tab
+# ⚠️ Modify this section to change the special need cases listed in the app's Search page
 sp_needs <- c(
   "Check accessions" = "sp_needs1",
   "Find samples" = "sp_needs2",
@@ -249,7 +249,7 @@ constants <- list(
   srqpath = srqpath,
   srqsheet = srqsheet,
   table_names = names(table_mapping),
-  tab.cols = tab.cols,
+  page.cols = page.cols,
   template.cols = template.cols,
   template.colnames = colnames(template.cols),
   default.cols = default.cols, # not sure if needed?
@@ -294,7 +294,7 @@ protected_columns <- c(
 # Dashboard statistics ============================
 # Keep a running update every time Aurora app is opened
 # These statistics allow any instability in database size to be monitored
-# See the Dashboard tab in the app
+# See the Dashboard page in the app
 # ⚠️ New Data Tables should be listed here
 t <- tibble_row(
   date = today(),
@@ -339,7 +339,7 @@ if (today - last.date > 2) {
   saveRDS(today, file = (paste0(filepath, "LastSaveDate.rds")))
 }
 
-# This periodically backs up samples/entries abandoned via the Edit tab
+# This periodically backs up samples/entries abandoned via the Edit page
 if (today - last.date > 7) {
   file.copy(from = "./RDataFiles/abandoned.csv", to = (paste0("./Autobackups/abandoned ", today, ".csv")))
 }
@@ -358,7 +358,7 @@ rm(i)
 rm(last.date)
 rm(today)
 rm(template.cols)
-rm(tab.cols)
+rm(page.cols)
 rm(sp_needs)
 # rm(default.cols) # 🚨 If removed, app crashes as loadprimarydata() can't find default.cols. Constants not helping?
 # it must be getting called somewhere?
