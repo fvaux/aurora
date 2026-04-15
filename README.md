@@ -1,7 +1,7 @@
 # Development
 This is a draft version of Aurora, currently under development. We are planning to submit Aurora for publication in the Journal of Open Source Software.
 
-# Contributions
+# Contributors
 Aurora was developed by Grant Abernethy and Felix Zareie-Vaux.
 
 # Summary
