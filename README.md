@@ -28,7 +28,7 @@ The entire database can be exported in RDS and .csv formats on the Export page. 
 
 To avoid repetitive data entry and editing, high-level taxonomic information (e.g. kingdom, phylum) is managed in another `Excel` file, 'taxonomy_source.xlsx'. Users can manually edit that reference table to update taxonomic information for samples. If desired, we have provided a utility `R` code to retrieve information from the Global Biodiversity Information Facility (GBIF).
 
-We encourage users familiar with R to customise Aurora. All of the `R` scripts are well-annotated and the Launch page answers frequently asked questions. Adding new columns or tables only requires a few changes that are flagged in annotations.
+We encourage users familiar with `R` to customise Aurora. All of the `R` scripts are well-annotated and the Launch page answers frequently asked questions. Adding new columns or tables only requires a few changes that are flagged in annotations.
 
 # AI usage disclosure
 Generative artificial intelligence chatbots, Google Gemini 3 Flash and OpenAI ChatGPT-5.3, assisted with R code generation, editing and annotation. All authors have reviewed, edited and validated these AI-assisted outputs and made the core design decisions.
