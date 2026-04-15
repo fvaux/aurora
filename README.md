@@ -18,7 +18,7 @@ To launch Aurora, users must have `R`, `Shiny` and `RStudio` installed with the 
 
 Once Aurora has been launched from `RStudio`, users import samples from aurora_queue.xlsx using the Upload page. Aurora automatically creates back-ups of the database and the `Excel` file, and it checks formatting and provides warnings if there are any issues. Alternatively, samples can be added manually using buttons and Excel-like functionality on the Edit page.
 
-All data is saved locally within the Aurora application’s folders, and Aurora does not connect with the internet of any external databases. Permanent RDS files store all data as characters, and when launched, Aurora loads data into memory and transforms certain fields into appropriate formats (e.g. numeric). 
+All data is saved locally within the Aurora application’s folders, and Aurora does not connect with the internet or any external databases. Permanent RDS files store all data as characters, and when launched, Aurora loads data into memory and transforms certain fields into appropriate formats (e.g. numeric). 
 
 Users can edit data in Aurora using the Edit page. That page includes functions to identify and remove potential duplicate entries. The Batch Edit page can be used to change values for a group of specimens (e.g. updating a storage box or taxonomic name). The Bulk Edit page can be used to export and re-import an entire table for editing outside of Aurora. Users can edit different tables within the database at the same time (e.g. Sample Detail and Sample Storage), but simultaneous edits to the same table, or bulk import/exports of the same table, may cause changes to be overwritten. 
 
