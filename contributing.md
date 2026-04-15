@@ -1,3 +1,2 @@
 # Contributors
-Grant A. Abernethy
-Felix Zareie-Vaux
+Grant A. Abernethy and Felix Zareie-Vaux
