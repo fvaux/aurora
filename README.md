@@ -1,9 +1,6 @@
 # Development
 This is a draft version of Aurora, currently under development. We are planning to submit Aurora for publication in the Journal of Open Source Software.
 
-# Contributors
-Aurora was developed by Grant Abernethy and Felix Zareie-Vaux.
-
 # Summary
 `Aurora` is a free, open-source laboratory information management system (LIMS) implemented as an `Shiny` web application using `R` and `RStudio`. Aurora simplifies the management of biological samples and their metadata throughout a laboratory workflow. Aurora is designed to accommodate a wide range of specimen types and it has features tailored for genetic research. Aurora can be used to find specimens, track storage capacity, assess processing times, and it can generate `html` reports with interactive tables, figures and maps to share with colleagues or clients. Aurora is friendly for non-programmers to use, as samples are uploaded via a `Microsoft Excel` spreadsheet, and the application has a simple graphical user interface (GUI) with Excel-like functionality for editing. Aurora automatically checks data formatting and creates regular database back-ups. Users familiar with `R` can readily customise Aurora as it uses a small number of well-annotated `R` scripts and it only relies on a dozen or so common `R` packages. Aurora is needed, as most LIMS are subscription-based, proprietary software that are challenging to customise and existing programs are often unwieldy for the diverse sample types and workflows found in most biological research laboratories.
 
@@ -29,6 +26,9 @@ The entire database can be exported in RDS and .csv formats on the Export page. 
 To avoid repetitive data entry and editing, high-level taxonomic information (e.g. kingdom, phylum) is managed in another `Excel` file, 'taxonomy_source.xlsx'. Users can manually edit that reference table to update taxonomic information for samples. If desired, we have provided a utility `R` code to retrieve information from the Global Biodiversity Information Facility (GBIF).
 
 We encourage users familiar with `R` to customise Aurora. All of the `R` scripts are well-annotated and the Launch page answers frequently asked questions. Adding new columns or tables only requires a few changes that are flagged in annotations.
+
+# Contributors
+Aurora was developed by Grant Abernethy and Felix Zareie-Vaux.
 
 # AI usage disclosure
 Generative artificial intelligence chatbots, Google Gemini 3 Flash and OpenAI ChatGPT-5.3, assisted with R code generation, editing and annotation. All authors have reviewed, edited and validated these AI-assisted outputs and made the core design decisions.
