@@ -1,0 +1,43 @@
+# R / RStudio ====
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+*.Rproj.user
+
+# Microsoft Office temporary files ====
+~$*
+
+# Operating system files ====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary and backup files ====
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# Log files ====
+*.log
+
+# R package / session caches ====
+.Rcache/
+renv/library/
+renv/staging/
+
+# Quarto / R Markdown generated files ====
+*_files/
+*_cache/
+.quarto/
+
+# Aurora automatic backups ====
+Autobackups/*
+
+# Aurora generated reports ====
+Reports/*
+
+# Aurora generated exports ====
+Export/*

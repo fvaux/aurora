@@ -404,7 +404,7 @@ server <- function(input, output, session) {
 
   values$reportFilterColumns <- c(
     "project", "project_code", "key_word",
-    "family", "genus", "species_binomial",
+    "family", "genus", "species_binomial", "common_group", "common_name",
     "storage_unit", "storage_box", "extract_unit", "extract_box",
     "sample_trip",
     "political_country", "political_state", "geographic_region", "geographic_subregion",
@@ -806,6 +806,88 @@ server <- function(input, output, session) {
       setView(lng = 0, lat = 0, zoom = 2)
   })
 
+  # Sample variation page =========================================
+  # Reactive value to store sample variation data
+  sample_variation_data <- reactiveVal(NULL)
+  
+  # Refresh report data
+  observeEvent(input$refresh_sample_variation, {
+    if (exists("report_data", envir = .GlobalEnv)) {
+      new_data <- get("report_data", envir = .GlobalEnv)
+      sample_variation_data(new_data)
+      showNotification("Sample variation data refreshed", type = "message")
+    } else {
+      showNotification(
+        "No report data found. Please generate it first in the Filter page.",
+        type = "error"
+      )
+    }
+  })
+  
+  # Generate tables and figures
+  observeEvent(input$generate_sample_variation, {
+    req(sample_variation_data())
+    
+    dat <- prepare_sample_variation_data(sample_variation_data())
+    
+    # Generate summary tables used by the categorical plots
+    sample_type_summary <- generate_sample_variation_summary(dat, "sample_type")
+    sex_summary <- generate_sample_variation_summary(dat, "sex")
+    developmental_stage_summary <- generate_sample_variation_summary(dat, "developmental_stage")
+    
+    # Generate body-size table used by the scatter plot
+    body_size_data <- generate_body_size_data(dat)
+    
+    # Generate interactive plots
+    sample_type_plot <- generate_sample_variation_histogram(
+      sample_type_summary,
+      x_col = "sample_type",
+      x_title = "Sample type"
+    )
+    
+    sex_plot <- generate_sample_variation_histogram(
+      sex_summary,
+      x_col = "sex",
+      x_title = "Sex"
+    )
+    
+    developmental_stage_plot <- generate_sample_variation_histogram(
+      developmental_stage_summary,
+      x_col = "developmental_stage",
+      x_title = "Developmental stage"
+    )
+    
+    body_size_plot <- generate_body_size_scatter(body_size_data)
+    
+    # Render plots on Sample variation page
+    output$sample_type_histogram <- renderPlotly({
+      sample_type_plot
+    })
+    output$sex_histogram <- renderPlotly({
+      sex_plot
+    })
+    output$developmental_stage_histogram <- renderPlotly({
+      developmental_stage_plot
+    })
+    output$body_size_scatter <- renderPlotly({
+      body_size_plot
+    })
+    
+    # Store tables for Report page export; they are intentionally not displayed here
+    reportItems$tables$sample_type_summary <- sample_type_summary
+    reportItems$tables$sex_summary <- sex_summary
+    reportItems$tables$developmental_stage_summary <- developmental_stage_summary
+    reportItems$tables$body_size_data <- body_size_data
+    
+    # Store plots for Report page export
+    reportItems$plots$sample_type_histogram <- sample_type_plot
+    reportItems$plots$sex_histogram <- sex_plot
+    reportItems$plots$developmental_stage_histogram <- developmental_stage_plot
+    reportItems$plots$body_size_scatter <- body_size_plot
+    
+    showNotification("Sample variation plots and tables generated", type = "message")
+  })
+  
   # Timeline page =========================================
   # Used to assess temporal variation for samples in report_data
   # Accumulation plots show the accumulation of data across the dated data tables over time

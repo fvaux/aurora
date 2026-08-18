@@ -61,12 +61,12 @@ ui <- fluidPage(
           wellPanel(
             style = "background-color: #d7ecfc",
             h4("Contributors and credit"),
-            p("Developed by Grant Abernethy and Felix Zareie-Vaux"),
-            strong("Please cite this paper for the Aurora app:"),
+            p("Developed by Grant A. Abernethy and Felix Zareie-Vaux"),
+            strong("Please cite:"),
             br(),
             tags$a(href = "https://www.doi.org/", "Zareie-Vaux F., Abernethy G.A. 2026. Aurora: a versatile, open-source laboratory information management system for biological samples using R Shiny. Journal of Open Source Software, XX, XX-XX. DOI.XXX.XXXX"),
             br(),
-            strong("Access Aurora's Zenodo repository here:"),
+            strong("GitHub repository:"),
             br(),
             tags$a(href = "https://www.doi.org/", "https://www.doi.org/")
           )
@@ -80,12 +80,12 @@ ui <- fluidPage(
           wellPanel(
             style = "background-color: #FFFFFF",
             h4("About Aurora"),
-            p("Aurora is a free, open-source laboratory information management system (LIMS), which operates using R, R Shiny and RStudio. The default version of the software is focused on the tracking and management of biological samples used for genetics research, but the app can be modified for any sample-based purpose."),
+            p("Aurora is a free, open-source laboratory information management system (LIMS) for biological samples, which operates using R, Shiny and RStudio."),
             strong("How it works ⚙️"),
             p("Aurora operates as a relational database, where data for each sample is linked to a unique sample accession. Beyond that mandatory identifier field, there are numerous optional fields to record information. These fields are organised and managed across 10 tables (Figure 1). The first five tables record direct sample information: tracking, classification, detail, provenance, and storage. Four tables focus on DNA and RNA research from samples: extraction, PCR, library preparation, and sequencing. A short, final table records information for publications associated with samples, which is mainly relevant for taxonomic research involving type specimens. "),
             strong("Using Aurora 👨🏼‍🔬💻👩🏽‍🔬"),
             p("Typically, users begin by entering data into fields using the ‘aurora_queue.xlsx’ Excel file (Figure 2). Aside from the sample accession, all fields are optional and users can arrange (and delete) columns in the Excel spreadsheet as they please. The Excel file has multiple tabs, so that users can progress samples along a laboratory workflow until they are ready for upload (e.g. sample intake > DNA extraction > PCR > sequencing > pre-upload > upload). That approach is particularly useful when separate personnel hand-over different stages of a laboratory workflow. The Excel file includes a data glossary and prompts for most fields, as well as a tab with ~500 rows of example data. When samples are ready to be imported into Aurora, users copy rows to the Upload tab, and we recommend appending those rows to the Manual backup tab as well."),
-            p("To launch Aurora, users must have R, Shiny and RStudio installed with the required R packages (that can be saved within a user’s R library). Aurora uses around a dozen, popular packages [@Shiny, @tidyverse, @lubridate, @DT, @rmarkdown, @readxl, @shinyWidgets, @knitr, @kableExtra, @shinytoastr, @plotly, @leaflet, @htmlwidgets, @writexl, @glue]. Under RStudio settings, Aurora can be opened within an internal window or an externally a web browser. Aurora needs to be saved in a shared file location to enable database sharing and simultaneous editing. Local settings (e.g. Excel and OneDrive) may be required to enable simultaneous editing of the aurora_queue.xlsx file."),
+            p("To launch Aurora, users must have R, Shiny and RStudio installed with the required R packages (that can be saved within a user’s R library). Aurora uses around a dozen, popular packages. Under RStudio settings, Aurora can be opened within an internal window or an externally a web browser. Aurora needs to be saved in a shared file location to enable database sharing and simultaneous editing. Local settings (e.g. Excel and OneDrive) may be required to enable simultaneous editing of the aurora_queue.xlsx file."),
             p("Once Aurora has been launched from RStudio, users import samples from aurora_queue.xlsx using the Upload page. Aurora automatically creates back-ups of the database and the Excel file, and it checks formatting and provides warnings if there are any issues. Alternatively, samples can be added manually using buttons and Excel-like functionality on the Edit page."),
             p("All data is saved locally within the Aurora application’s folders, and Aurora does not connect with the internet of any external databases. Permanent RDS files store all data as characters, and when launched, Aurora loads data into memory and transforms certain fields into appropriate formats (e.g. numeric). "),
             p("Users can edit data in Aurora using the Edit page. That page includes functions to identify and remove potential duplicate entries. The Batch Edit page can be used to change values for a group of specimens (e.g. updating a storage box or taxonomic name). The Bulk Edit page can be used to export and re-import an entire table for editing outside of Aurora. Users can edit different tables within the database at the same time (e.g. Sample Detail and Sample Storage), but simultaneous edits to the same table, or bulk import/exports of the same table, may cause changes to be overwritten."),
@@ -118,7 +118,7 @@ ui <- fluidPage(
               tags$li("Keep names short (<12 characters)"),
               tags$li("Avoid some characters (e.g. # * ,), although Aurora is designed to cope with common separators (e.g. - _ .)"),
               tags$li("Avoid sample accessions with a small number of fixed digits (e.g. 'A01' or 'Plant105') - this messes up sorting if the dataset grows"),
-              tags$li("Avoid dates in sample accessions - these can be corrupted by Excel")
+              tags$li("Avoid using dates as sample accessions - these can be corrupted by Excel")
             ),
             strong("How does Aurora handle subsamples? 🧫"),
             p("Aurora is fundamentally focused on samples or specimens, which are represented by a unique sample accession. Different tissue clippings, separate microbial isolates, replicate samples, or other subsamples of the same organism or environmental matrix cannot share the exact same sample accession. Those samples can be named in a consistent fashion to indicate subsampling though (e.g. Sample1-1, Sample1-2; or Specimen1, Specimen1.r1, etc.)."),
@@ -176,19 +176,21 @@ ui <- fluidPage(
             p("Dates should be updated using the separate year, month and day columns. Date columns will be automatically updated when the app is launched."),
             strong("Can Aurora store other time information? ⌚💀"),
             p("Aurora can record time in 24-hour hours and minutes for sample collection using sample_hour and sample_minute. On launch, Aurora converts these separate columns into the 24-hour HH:MM format."),
-            p("For simplicity's sake, the default version of the app does not record seconds or times for othr columns. It also does not provide columns for things like the age estimates of fossils or radiometric dates."),
+            p("For simplicity's sake, the default version of the app does not record seconds or times for other columns. It also does not provide columns for things like the age estimates of fossils or radiometric dates."),
             strong("What is munge-proofing? 🧹"),
             p("When data is uploaded, Aurora conducts several 'munge-proofing' or transforming steps to prevent poorly formatted data (e.g. extra spaces or commas, and ways to handle missing data/NAs). When data is saved, it is kept in a 'munge-proof' format that inserts an underscore (_) before characters to prevent formatting errors. All data is saved as characters. When the app is launched, it loads the data into memory and transforms such columns into appropriate formats (e.g. numeric). Edits in memory can be sent back to the permanent files, which includes munge-proofing."),
             strong("What are the example data? 🦠🐟🦒"),
             p("Aurora and the aurora_queue.xlxs file are provided with >500 entries of fictitious example data. The example data indicate how fields, tables and pages within the app can be used, and it can be useful for testing during app development."),
             p("Users can switch between user data and example data using the toggle on this page. Example data .RDS files are stored in a separate directory."),
-            p("A copy of the example data is stored as a page in the Aurora Excel file. If desired, that example data can be uploaded into Aurora and saved in the normal .RDS file location."),
+            p("A copy of the example data is stored on  a tab in the Aurora Excel file. If desired, that example data can be uploaded into Aurora and saved in the normal .RDS file location."),
+            strong("Does Aurora connect to the internet? 🌐"),
+            p("No, while Aurora is a Shiny web application that can load in a web browser, it is offline and does not connect to the internet or any external databases. All data is kept in the RDS files."),
             strong("How do I report an error with Aurora? 🚨"),
             p("Please raise a new issue in Aurora's GitHub repository (linked the to Zenodo archive)."),
             strong("How can I share my own customised version of Aurora? 🛠️"),
             p("We recommend modifying a forked version Aurora's GitHub repository. Please remember to cite the app and our paper (linked above). We're excited to see what people create!"),
             strong("Why is it called Aurora? ❄️🥶"),
-            p("The app is named after SY Aurora, which was involved in multiple Antarctic rescue missions in the Heroic Age of Antarctic Exploration. Like the vessel, this app aims to save scientists and specimens lost in freezers!")
+            p("The app is named after steam yacht Aurora, which was involved in multiple Antarctic rescue missions in the Heroic Age of Antarctic Exploration. Like the vessel, this app aims to save scientists and specimens lost in freezers!")
           )
         )
       )
@@ -767,7 +769,7 @@ ui <- fluidPage(
           column(
             12,
             wellPanel(
-              p("View and summarise the geographic origin of samples in report data, and map samples with include latitude and longitude coordinates."),
+              p("View and summarise the geographic origin of samples in report data, and map samples with include latitude and longitude coordinates"),
               p("In the map, samples with identical coordinates have ~50 m of jitter added to separate points (click on a sample to check true coordinates)."),
               fluidRow(
                 column(
@@ -834,6 +836,70 @@ ui <- fluidPage(
       )
     ),
 
+    # Sample variation =========================================
+    # Used to assess variation in sample characteristics within report_data
+    tabPanel(
+      "Sample variation",
+      h3("Sample variation"),
+      fluidPage(
+        fluidRow(
+          column(
+            3,
+            wellPanel(
+              p("Explore variation in sample type, sex, developmental stage and body size in report data"),
+              p("Body size uses only sample length and weight."),
+              actionBttn(
+                "refresh_sample_variation",
+                label = "Refresh report data",
+                size = "sm",
+                style = "unite",
+                color = "warning",
+                icon = icon("refresh")
+              ),
+              br(),
+              br(),
+              actionBttn(
+                "generate_sample_variation",
+                label = "Generate tables and figures",
+                size = "sm",
+                style = "unite",
+                color = "warning",
+                icon = icon("chart-bar")
+              )
+            )
+          ),
+          column(
+            9,
+            fluidRow(
+              column(
+                6,
+                h4("Sample type"),
+                plotlyOutput("sample_type_histogram", height = "350px")
+              ),
+              column(
+                6,
+                h4("Sex"),
+                plotlyOutput("sex_histogram", height = "350px")
+              )
+            ),
+            tags$hr(),
+            fluidRow(
+              column(
+                6,
+                h4("Developmental stage"),
+                plotlyOutput("developmental_stage_histogram", height = "350px")
+              ),
+              column(
+                6,
+                h4("Body size (length vs weight)"),
+                plotlyOutput("body_size_scatter", height = "350px")
+              )
+            )
+          )
+        )
+      )
+    ),
+    
     # Timeline =========================================
     # Used to assess temporal variation for samples in report_data
     # Accumulation plots show the accumulation of data across the dated data tables over time

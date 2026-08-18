@@ -30,6 +30,9 @@ shinyApp(ui = ui, server = server) # Run this command to launch the Aurora app
 
 ## General tasks ====
 # Update/add to Example Data to ensure all columns demonstrated
+# Generate Example data report and Excel file
+
+# Make empty/clean sample_tracking and last_date RDS files for public release
 
 # Check all library packages are required
 
@@ -37,12 +40,13 @@ shinyApp(ui = ui, server = server) # Run this command to launch the Aurora app
 
 ## Time data ====
 # Update formatDataTables.R to process:
-# sample_hour (0 to 23, no negative numbers)
+# sample_hour (0 to 23, no negative numbers)  
 # sample_minute (0 - 59, no negative numbers)
 # Then make 'provenance_time' column combining sample_hour and sample_minute
 
 ## bslib theme ====
 # Change to bslib theme <-- PAUSED
+# bslib version 5 not compatible with various functions
 # 🚨 Have tried this, but rending of side panel (e.g. filtering options) on Filter page is failing under bslib
 # Don't want to fix with CSS overrides
 # ⚠️ When bslib applied, use sidebarLayout to render table parallel with sidebar on Search and Edit pages (works once implemented)
