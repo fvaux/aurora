@@ -22,7 +22,6 @@ suppressPackageStartupMessages({
   library(glue) # For string formatting - used for for exporting html reports
   library(tools) # For filtering on Filter page (is a base R package but need to load)
   library(writexl) # For writing Excel reports
-  #library(quarto) # For exporting html reports
 })
 
 # Source R files ============================
@@ -239,6 +238,10 @@ generate_taxonomy_table <- function(classification_table, taxonomypath) {
   bind_rows(matched_species, matched_genus, matched_family)
 }
 
+# Batch editable columns  ============================
+batch_columns <-c("storage_unit", "storage_box", "storage_plate", "extract_unit", "extract_box", "extract_plate")
+
+
 # Combine final result for app held table_SampleTaxonomy (on launch)
 # ⚠️ This table is made on app launch, it isn't automatically saved as an .rds file (also not available under Bulk Edit)
 # ⚠️ Users can export any of these columns for downstream analyses though
@@ -255,7 +258,8 @@ constants <- list(
   template.colnames = colnames(template.cols),
   default.cols = default.cols, # not sure if needed?
   search_sp_need = names(sp_needs),
-  sp_needs = sp_needs
+  sp_needs = sp_needs,
+  batch_columns = batch_columns
 )
 
 # Values ============================

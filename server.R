@@ -135,147 +135,7 @@ server <- function(input, output, session) {
     save_edits(input$checkGroup, table_mapping, fpath)
   })
 
-  # Batch edit page ====
-  observeEvent(input$bulk_table, {
-    
-    df <- get(table_mapping[input$bulk_table], envir = .GlobalEnv)
-    
-    match_cols <- get_matchable_columns(df, protected_columns)
-    edit_cols  <- get_editable_columns(df, protected_columns)
-    
-    updateSelectInput(
-      session,
-      "bulk_match_col",
-      choices = match_cols
-    )
-    
-    updateSelectInput(
-      session,
-      "bulk_edit_col",
-      choices = edit_cols
-    )
-    
-  })
   
-  
-  observeEvent(input$bulk_match_col, {
-    
-    req(input$bulk_table)
-    
-    df <- get(table_mapping[input$bulk_table], envir = .GlobalEnv)
-    
-    vals <- sort(unique(df[[input$bulk_match_col]]))
-    
-    updateSelectInput(
-      session,
-      "bulk_match_val",
-      choices = vals
-    )
-    
-  })
-  
-  
-  observeEvent(input$bulk_preview, {
-    
-    req(
-      input$bulk_table,
-      input$bulk_match_col,
-      input$bulk_match_val,
-      input$bulk_edit_col
-    )
-    
-    df <- get(table_mapping[input$bulk_table], envir = .GlobalEnv)
-    
-    result <- bulk_preview_edit(
-      df,
-      input$bulk_match_col,
-      input$bulk_match_val,
-      input$bulk_edit_col,
-      input$bulk_new_val
-    )
-    
-    output$bulk_rows_changed <- renderText({
-      paste("Rows affected:", result$rows_changed)
-    })
-    
-    output$bulk_preview_table <- DT::renderDataTable({
-      
-      DT::datatable(
-        result$preview,
-        options = list(pageLength = 20, scrollX = TRUE)
-      )
-      
-    })
-    
-  })
-  
-  
-  observeEvent(input$bulk_apply, {
-    
-    req(
-      input$bulk_table,
-      input$bulk_match_col,
-      input$bulk_match_val,
-      input$bulk_edit_col
-    )
-    
-    df <- get(table_mapping[input$bulk_table], envir = .GlobalEnv)
-    
-    df <- bulk_apply_edit(
-      df,
-      input$bulk_match_col,
-      input$bulk_match_val,
-      input$bulk_edit_col,
-      input$bulk_new_val
-    )
-    
-    table_key <- table_mapping[input$bulk_table]
-    
-    assign(table_key, df, envir = .GlobalEnv)
-    
-    saveRDS(
-      df,
-      file = paste0(fpath(), table_key, ".rds")
-    )
-    
-    toastr_success("Bulk edit applied", position = "bottom-left")
-    
-  })
-  
-
-  # Move boxes page ============================
-  # Used for moving or renaming boxes
-  # 🌱 Can we update this page to handle both samples and extractions (as done for Check Boxes)?
-  # 🌱 Can we combine the Check and Move boxes pages?
-  # 🌱 Could 'generate data' button to cope with refreshing data?
-  # 🌱 Could moving tasks to a function .R file help with refreshing and changing sample type?
-  observeEvent(input$moveBoxtoSubunit, {
-    box_type <- input$data_type_move
-    table_data <- update_storage_data(box_type)
-    table_data[which(table_data$storage_box == as.character(input$moveBoxSelect)), "storage_shelf"] <<- as.character(input$movesubunitdest)
-    values$subunitChoices_samples <<- levels(as.factor(table_data$storage_shelf))
-    saveRDS(table_data, file = paste0(fpath, "table_storage_data.rds"))
-    toastr_success("Records Updated", position = "bottom-left")
-  })
-
-  observeEvent(input$moveRenameBox, {
-    box_type <- input$data_type_move
-    table_data <- update_storage_data(box_type)
-    table_data[which(table_data$storage_box == as.character(input$moveBoxSelect2)), "storage_box"] <<- as.character(input$moveBoxRename)
-    values$boxChoices_samples <<- levels(as.factor(table_data$storage_box))
-    saveRDS(table_data, file = paste0(fpath, "table_storage_data.rds"))
-    toastr_success("Records Updated", position = "bottom-left")
-  })
-
-  observeEvent(input$moveRenameSubunit, {
-    box_type <- input$data_type_move
-    table_data <- update_storage_data(box_type)
-    table_data[which(table_data$storage_box == as.character(input$moveSubunitSelect)), "storage_shelf"] <<- as.character(input$movesubunitRename)
-    values$subunitChoices_samples <<- levels(as.factor(table_data$storage_box))
-    saveRDS(table_data, file = paste0(fpath, "table_storage_data.rds"))
-    toastr_success("Records Updated", position = "bottom-left")
-  })
-
   # Upload page ============================
   # Used to upload data from the aurora_queue.xlsx Excel file'Upload' page
   # This is the safest way to upload many samples, as the upload functions do many formatting checks
@@ -333,8 +193,291 @@ server <- function(input, output, session) {
   # 🌱 Need to make these new output formats
   # Export all sequenced samples for GenBank (.xlsx)
   # exportGenBank
-
-
+  
+  # Batch edit and move page ============================
+  # General batch edit ====
+  observeEvent(input$batch_apply, {
+    
+    req(
+      input$batch_editable_col,
+      input$batch_match_val,
+      input$batch_edit_col
+    )
+    
+    # Determine which table the selected column belongs to
+    x <- sub("_.*", "", input$batch_editable_col)
+    
+    col <- input$batch_editable_col
+    old_val <- input$batch_match_val
+    new_val <- input$batch_edit_col
+    
+    if (x == "storage") {
+      
+      result <- batch_edit_values(
+        table_data = table_SampleStorage,
+        col = col,
+        old_val = old_val,
+        new_val = new_val
+      )
+      
+      table_SampleStorage <- result$data
+      
+      assign(
+        "table_SampleStorage",
+        table_SampleStorage,
+        envir = .GlobalEnv
+      )
+      
+      saveRDS(
+        table_SampleStorage,
+        file = paste0(filepath, "table_SampleStorage.rds")
+      )
+      
+      toastr_success(
+        paste(result$rows_changed, "sample records updated"),
+        position = "bottom-left"
+      )
+      
+    } else if (x == "extract") {
+      
+      result <- batch_edit_values(
+        table_data = table_Extraction,
+        col = col,
+        old_val = old_val,
+        new_val = new_val
+      )
+      
+      table_Extraction <- result$data
+      
+      assign(
+        "table_Extraction",
+        table_Extraction,
+        envir = .GlobalEnv
+      )
+      
+      saveRDS(
+        table_Extraction,
+        file = paste0(filepath, "table_Extraction.rds")
+      )
+      
+      toastr_success(
+        paste(result$rows_changed, "extract records updated"),
+        position = "bottom-left"
+      )
+      
+    } else {
+      
+      return()
+    }
+  })
+  
+  
+  # Move storage boxes ====
+  
+  # Update available storage units
+  observeEvent(input$move_box_type, {
+    
+    unit_choices <- get_batch_storage_units(
+      box_type = input$move_box_type,
+      table_SampleStorage = table_SampleStorage,
+      table_Extraction = table_Extraction
+    )
+    
+    updateSelectInput(
+      session,
+      "move_current_unit",
+      choices = unit_choices,
+      selected = NULL
+    )
+    
+    updateSelectizeInput(
+      session,
+      "move_unit_dest",
+      choices = unit_choices,
+      selected = NULL,
+      server = TRUE
+    )
+    
+  })
+  
+  
+  # Update available boxes based on current storage unit
+  observeEvent(
+    c(input$move_box_type, input$move_current_unit),
+    {
+      
+      req(
+        input$move_box_type,
+        input$move_current_unit
+      )
+      
+      box_choices <- get_batch_storage_boxes(
+        box_type = input$move_box_type,
+        current_unit = input$move_current_unit,
+        table_SampleStorage = table_SampleStorage,
+        table_Extraction = table_Extraction
+      )
+      
+      updateSelectInput(
+        session,
+        "move_box_select",
+        choices = box_choices,
+        selected = NULL
+      )
+      
+    }
+  )
+  
+  
+  # Move selected box to selected/new storage unit
+  observeEvent(input$move_box_apply, {
+    
+    req(
+      input$move_box_type,
+      input$move_current_unit,
+      input$move_box_select,
+      input$move_unit_dest
+    )
+    
+    # Prevent moving a box to its existing unit
+    if (input$move_current_unit == input$move_unit_dest) {
+      
+      toastr_warning(
+        "The selected destination is the same as the current storage unit",
+        position = "bottom-left"
+      )
+      
+      return()
+    }
+    
+    
+    # Samples
+    if (input$move_box_type == "storage") {
+      
+      result <- move_storage_box(
+        table_data = table_SampleStorage,
+        unit_col = "storage_unit",
+        box_col = "storage_box",
+        current_unit = input$move_current_unit,
+        selected_box = input$move_box_select,
+        destination_unit = input$move_unit_dest
+      )
+      
+      # Stop if no records were found
+      if (result$rows_changed == 0) {
+        
+        toastr_warning(
+          "No matching sample records found",
+          position = "bottom-left"
+        )
+        
+        return()
+      }
+      
+      table_SampleStorage <- result$data
+      
+      assign(
+        "table_SampleStorage",
+        table_SampleStorage,
+        envir = .GlobalEnv
+      )
+      
+      saveRDS(
+        table_SampleStorage,
+        file = paste0(filepath, "table_SampleStorage.rds")
+      )
+      
+      toastr_success(
+        paste(result$rows_changed, "sample records updated"),
+        position = "bottom-left"
+      )
+      
+      
+      # Extractions
+    } else if (input$move_box_type == "extract") {
+      
+      result <- move_storage_box(
+        table_data = table_Extraction,
+        unit_col = "extract_unit",
+        box_col = "extract_box",
+        current_unit = input$move_current_unit,
+        selected_box = input$move_box_select,
+        destination_unit = input$move_unit_dest
+      )
+      
+      # Stop if no records were found
+      if (result$rows_changed == 0) {
+        
+        toastr_warning(
+          "No matching extract records found",
+          position = "bottom-left"
+        )
+        
+        return()
+      }
+      
+      table_Extraction <- result$data
+      
+      assign(
+        "table_Extraction",
+        table_Extraction,
+        envir = .GlobalEnv
+      )
+      
+      saveRDS(
+        table_Extraction,
+        file = paste0(filepath, "table_Extraction.rds")
+      )
+      
+      toastr_success(
+        paste(result$rows_changed, "extract records updated"),
+        position = "bottom-left"
+      )
+      
+    } else {
+      
+      return()
+    }
+    
+    
+    # Refresh selectors after move ====
+    
+    unit_choices <- get_batch_storage_units(
+      box_type = input$move_box_type,
+      table_SampleStorage = table_SampleStorage,
+      table_Extraction = table_Extraction
+    )
+    
+    box_choices <- get_batch_storage_boxes(
+      box_type = input$move_box_type,
+      current_unit = input$move_current_unit,
+      table_SampleStorage = table_SampleStorage,
+      table_Extraction = table_Extraction
+    )
+    
+    updateSelectInput(
+      session,
+      "move_current_unit",
+      choices = unit_choices,
+      selected = input$move_current_unit
+    )
+    
+    updateSelectInput(
+      session,
+      "move_box_select",
+      choices = box_choices,
+      selected = NULL
+    )
+    
+    updateSelectizeInput(
+      session,
+      "move_unit_dest",
+      choices = unit_choices,
+      selected = NULL,
+      server = TRUE
+    )
+    
+  })
 
   # Bulk edit page ============================
   # Used to export and import each Data Table .rds file for manual bulk editing in Excel or a text editor
@@ -710,80 +853,48 @@ server <- function(input, output, session) {
 
   # Geography page =========================================
   # Used to map and assess the spatial distribution of samples in report_data
-
+  
   # Reactive value to store map data
   map_data_reactive <- reactiveVal(NULL)
-
+  
+  
   # Refresh map data
   observeEvent(input$generate_data, {
-    req(filtered_df()) # Ensure filtered data exists
-
-    map_data <- prepare_map_data(filtered_df()) # Prepare map data from filtered data
-
+    
+    req(filtered_df())
+    
+    # Prepare map data
+    # Samples without lat1/long1 are excluded from map_data,
+    # but remain available for the geography summary table
+    map_data <- prepare_map_data(filtered_df())
+    
     map_data_reactive(map_data)
-    showNotification("Map data refreshed", type = "message")
+    
+    showNotification(
+      "Map data refreshed",
+      type = "message"
+    )
   })
-
+  
+  
   # Generate map and geography summary table
   observeEvent(input$generate_map, {
+    
+    req(filtered_df())
+    
     map_data <- map_data_reactive()
-
     basemap_selected <- input$basemap_choice
-
-    # Validate that map data exists
-    if (is.null(map_data) || nrow(map_data) == 0) {
-      showNotification("No map data available to display", type = "error")
-      output$map_samples <- renderLeaflet({
-        leaflet() %>%
-          addProviderTiles(providers$Esri.WorldTopoMap) %>%
-          setView(lng = 0, lat = 0, zoom = 2)
-      })
-      output$geography_summary_table <- renderDataTable({
-        datatable(data.frame(Message = "No map data available"), options = list(dom = "t"))
-      })
-      return()
-    }
-
-    # If either coordinate column has entirely no data, stop and show error
-    if (all(is.na(map_data$lat1)) || all(is.na(map_data$long1))) {
-      showNotification("No coordinate data available for map", type = "error")
-      output$map_samples <- renderLeaflet({
-        leaflet() %>%
-          addProviderTiles(providers$Esri.WorldTopoMap) %>%
-          setView(lng = 0, lat = 0, zoom = 2)
-      })
-      output$geography_summary_table <- renderDataTable({
-        datatable(data.frame(Message = "No coordinate data available"), options = list(dom = "t"))
-      })
-      return()
-    }
-
-    # Otherwise, render the map (even if some rows have missing coordinates)
-    output$map_samples <- renderLeaflet({
-      rendermap(map_data, basemap_selected)
-    })
-
-    # Store rendered map for reporting
-    reportItems$plots$sample_map <- rendermap(map_data, basemap_selected)
-
-    # Generate summary table for map data
-    geography_summary <- map_data %>%
-      group_by(
-        political_country,
-        political_state,
-        geographic_region,
-        geographic_subregion,
-        sample_location,
-        sample_point
-      ) %>%
-      summarise(
-        n_samples = n(),
-        .groups = "drop"
-      ) %>%
-      arrange(desc(n_samples))
-
-    # Render the summary table
+    
+    
+    # Generate geography summary table ====
+    # Uses all filtered samples, including those without coordinates
+    geography_summary <- generate_geography_summary(
+      filtered_df()
+    )
+    
+    # Render geography summary table
     output$geography_summary_table <- renderDataTable({
+      
       datatable(
         geography_summary,
         options = list(
@@ -792,18 +903,73 @@ server <- function(input, output, session) {
         ),
         rownames = FALSE
       )
+      
     })
-
-    # Store table for reporting
+    
+    # Store geography summary table for reporting
     reportItems$tables$geography_summary <- geography_summary
-
-    showNotification("Map and summary table generated.", type = "message")
+    
+    
+    # Generate map ====
+    
+    # Stop map generation if no mapped records are available
+    if (is.null(map_data) || nrow(map_data) == 0) {
+      
+      showNotification(
+        "No coordinate data available for map; geography summary table generated",
+        type = "warning"
+      )
+      
+      output$map_samples <- renderLeaflet({
+        
+        leaflet() %>%
+          addProviderTiles(providers$Esri.WorldTopoMap) %>%
+          setView(
+            lng = 0,
+            lat = 0,
+            zoom = 2
+          )
+        
+      })
+      
+      return()
+    }
+    
+    
+    # Render map
+    output$map_samples <- renderLeaflet({
+      
+      rendermap(
+        map_data,
+        basemap_selected
+      )
+      
+    })
+    
+    # Store rendered map for reporting
+    reportItems$plots$sample_map <- rendermap(
+      map_data,
+      basemap_selected
+    )
+    
+    showNotification(
+      "Map and summary table generated.",
+      type = "message"
+    )
   })
-
+  
+  
+  # Default map
   output$map_samples <- renderLeaflet({
+    
     leaflet() %>%
       addProviderTiles(providers$Esri.WorldTopoMap) %>%
-      setView(lng = 0, lat = 0, zoom = 2)
+      setView(
+        lng = 0,
+        lat = 0,
+        zoom = 2
+      )
+    
   })
 
   # Sample variation page =========================================
@@ -960,7 +1126,7 @@ server <- function(input, output, session) {
     }
     
     # Identify the 'All sample data' table
-    all_sample_data_table <- "All sample data"
+    all_sample_data_table <- "All sample data" 
     
     # Get all table names EXCEPT 'All sample data'
     default_selected <- setdiff(table_names, all_sample_data_table)
@@ -1172,8 +1338,9 @@ output: html_document
     content <- c(
       content,
       "<strong>This report was generated using Aurora</strong>.
-      <br />Please cite: Zareie-Vaux F., Abernethy G.A. 2026. Aurora: a versatile, open-source laboratory information management system for biological samples using R Shiny. <i>Journal of Open Source Software</i>, XX, XX-XX. <a href='https://www.doi.org/'>DOI.XXX.XXXX</a>"
-    )
+      <br />Please cite: Zareie-Vaux F., Abernethy G.A. 2026. Aurora: a versatile, open-source laboratory information management system for biological samples using R Shiny. <i>Journal of Open Source Software</i>, XX, XX-XX. <a href='https://www.doi.org/'>DOI.XXX.XXXX</a>
+      <br /><a href='https://github.com/fvaux/aurora'>Aurora on GitHub</a>"
+      )
     
     # Write temporary qmd file
     writeLines(content, qmd_file)

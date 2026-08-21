@@ -8,10 +8,11 @@
 #'
 #' Internal helper functions used by the Geography page of the Aurora Shiny app.
 #'
-#' These functions help plot the spatial distribution of samples on maps.
+#' These functions help summarise and plot the spatial distribution of samples.
 #'
 #' @keywords internal
 NULL
+
 
 # Prepare map data ====
 #' Prepare Map Data
@@ -38,6 +39,8 @@ NULL
 #' }
 #'
 #' @details
+#' Only records containing both `lat1` and `long1` are retained for mapping.
+#'
 #' Jitter is applied only when duplicate coordinate pairs are detected.
 #' The default jitter magnitude (±0.0005 degrees) corresponds to
 #' approximately ±50 metres.
@@ -47,49 +50,143 @@ NULL
 #' @examples
 #' map_data <- prepare_map_data(report_data)
 prepare_map_data <- function(report_data) {
+  
   # Select table and columns
   map_data <- report_data %>%
     select(
-      sample_accession, project, species_binomial, provenance_date, political_country, political_state,
-      geographic_region, geographic_subregion, sample_location, sample_point, substrate,
-      lat1, long1, lat2, long2, depth1, depth2, altitude1, altitude2
+      sample_accession,
+      project,
+      species_binomial,
+      provenance_date,
+      political_country,
+      political_state,
+      geographic_region,
+      geographic_subregion,
+      sample_location,
+      sample_point,
+      substrate,
+      lat1,
+      long1,
+      lat2,
+      long2,
+      depth1,
+      depth2,
+      altitude1,
+      altitude2
     ) %>%
-    #
-    #     # Assign marker colors
-    #     mutate(marker_color = case_when(
-    #       is.na(sequencing_status) ~ "blue",
-    #       sequencing_status == "Pass" ~ "gold",
-    #       sequencing_status == "Fail" ~ "red",
-    #       TRUE ~ "grey"
-    #     )) %>%
-
+    
     # Convert coordinates and other numeric columns to numeric
-    mutate(across(
-      c(lat1, long1, lat2, long2, depth1, depth2, altitude1, altitude2),
-      as.numeric
-    )) %>%
-    # Keep only rows with valid lat/long
+    mutate(
+      across(
+        c(
+          lat1,
+          long1,
+          lat2,
+          long2,
+          depth1,
+          depth2,
+          altitude1,
+          altitude2
+        ),
+        as.numeric
+      )
+    ) %>%
+    
+    # Keep only rows with valid lat/long for mapping
     filter(!is.na(lat1) & !is.na(long1))
-
-  # Count duplicates
+  
+  # Count duplicate coordinate pairs
   coord_counts <- map_data %>%
-    count(lat1, long1, name = "point_count")
-
-  # Join back
+    count(
+      lat1,
+      long1,
+      name = "point_count"
+    )
+  
+  # Join duplicate counts back to map data
   map_data <- map_data %>%
-    left_join(coord_counts, by = c("lat1", "long1"))
-
-  # Apply jitter to duplicates
-  # ⚠️ 0.0005 corresponds to approximately ±50 m; users can change to customise app
-  set.seed(42) # reproducibility
+    left_join(
+      coord_counts,
+      by = c("lat1", "long1")
+    )
+  
+  # Apply jitter to duplicate coordinates
+  # ⚠️ 0.0005 corresponds to approximately ±50 m;
+  # users can change this value to customise the app
+  set.seed(42)
+  
   map_data <- map_data %>%
     mutate(
-      jitter_lat = ifelse(point_count > 1, lat1 + runif(n(), -0.0005, 0.0005), lat1),
-      jitter_long = ifelse(point_count > 1, long1 + runif(n(), -0.0005, 0.0005), long1)
+      jitter_lat = ifelse(
+        point_count > 1,
+        lat1 + runif(n(), -0.0005, 0.0005),
+        lat1
+      ),
+      jitter_long = ifelse(
+        point_count > 1,
+        long1 + runif(n(), -0.0005, 0.0005),
+        long1
+      )
     )
-
+  
   return(map_data)
 }
+
+
+# Generate geography summary table ====
+#' Generate Geography Summary Table
+#'
+#' Creates a summary table counting the number of samples for each
+#' combination of geographic location fields used by the Aurora
+#' Geography page.
+#'
+#' @param report_data A data frame containing sample metadata and
+#' geographic location fields.
+#'
+#' @return A data frame containing sample counts for each combination of:
+#' \describe{
+#'   \item{political_country}{Country}
+#'   \item{political_state}{State, province, or equivalent}
+#'   \item{geographic_region}{Geographic region}
+#'   \item{geographic_subregion}{Geographic subregion}
+#'   \item{sample_location}{Sample location}
+#'   \item{sample_point}{Sample point}
+#'   \item{n_samples}{Number of samples in each location grouping}
+#' }
+#'
+#' @details
+#' Unlike \code{prepare_map_data()}, this function does not require
+#' latitude or longitude coordinates. All samples in the supplied report
+#' data are included in the geography summary, including samples without
+#' coordinate data.
+#'
+#' Records are grouped across all geographic location fields and arranged
+#' from largest to smallest sample count.
+#'
+#' @export
+#'
+#' @examples
+#' geography_summary <- generate_geography_summary(report_data)
+generate_geography_summary <- function(report_data) {
+  
+  geography_summary <- report_data %>%
+    group_by(
+      political_country,
+      political_state,
+      geographic_region,
+      geographic_subregion,
+      sample_location,
+      sample_point
+    ) %>%
+    summarise(
+      n_samples = n(),
+      .groups = "drop"
+    ) %>%
+    arrange(desc(n_samples))
+  
+  return(geography_summary)
+}
+
 
 # Render map ====
 #' Render Interactive Map
@@ -116,10 +213,12 @@ prepare_map_data <- function(report_data) {
 #' map_data <- prepare_map_data(report_data)
 #' rendermap(map_data)
 rendermap <- function(map_data, basemap = "Esri.WorldTopoMap") {
+  
   leaflet(data = map_data) %>%
     addProviderTiles(providers[[basemap]]) %>%
     addCircleMarkers(
-      ~jitter_long, ~jitter_lat,
+      ~jitter_long,
+      ~jitter_lat,
       popup = ~ paste(
         "<strong>Sample:</strong>", sample_accession, "<br>",
         "<strong>Species binomial:</strong>", paste0("<i>", species_binomial, "</i>"), "<br>",
@@ -133,7 +232,9 @@ rendermap <- function(map_data, basemap = "Esri.WorldTopoMap") {
         "<strong>Depth 1:</strong>", depth1, "<br>",
         "<strong>Altitude 1:</strong>", altitude1
       ),
-      radius = 5, color = "red", fillOpacity = 0.7
+      radius = 5,
+      color = "red",
+      fillOpacity = 0.7
     ) %>%
     setView(
       lng = mean(map_data$long1, na.rm = TRUE),

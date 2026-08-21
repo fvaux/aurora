@@ -2,11 +2,50 @@
 # Developers: Grant Abernethy and Felix Zareie-Vaux
 
 ui <- fluidPage(
+  
+  tags$head(
+    tags$style(HTML("
+    
+    /* Reporting tabs: Filter onwards */
+    #main_tabs > li:nth-child(n+9) > a {
+      background-color: #d7ecfc;
+    }
+    
+    /* Reporting tabs when hovered */
+    #main_tabs > li:nth-child(n+9) > a:hover {
+      background-color: #c5e1f5;
+    }
+    
+    /* Keep active reporting tab distinct */
+    #main_tabs > li:nth-child(n+9).active > a,
+    #main_tabs > li:nth-child(n+9).active > a:hover,
+    #main_tabs > li:nth-child(n+9).active > a:focus {
+      background-color: #ffffff;
+    }
+    
+    /* Add Reporting label immediately before Filter */
+    #main_tabs > li:nth-child(9) {
+      margin-left: 75px;
+      position: relative;
+    }
+    
+    #main_tabs > li:nth-child(9)::before {
+      content: 'Reporting:';
+      position: absolute;
+      left: -72px;
+      top: 11px;
+      color: #003366;
+      white-space: nowrap;
+    }
+    
+  "))
+  ),
+  
   useToastr(),
-
+  
   # Header  ============================
   headerPanel(title = "", windowTitle = "Aurora LIMS"),
-
+  
   # Banner title
   div(
     class = "navbar navbar-default", # Use navbar styling for a narrow look
@@ -16,7 +55,7 @@ ui <- fluidPage(
                  text-align: left; 
                  min-height: 20px; 
                  line-height: 20px;",
-
+    
     # Use an h3 tag, which is a good size for a smaller title
     tags$h3(
       "Aurora – laboratory information management system",
@@ -26,11 +65,20 @@ ui <- fluidPage(
                      font-size: 18px; 
                      font-weight: normal; 
                      display: inline-block;"
+    ),
+    tags$a(
+      href = "https://github.com/fvaux/aurora",
+      "GitHub",
+      target = "_blank",
+      style = "color: white;
+           float: right;
+           font-size: 13px;"
     )
   ),
-
+  
   # Main tabsetpanel ============================
   tabsetPanel(
+    id = "main_tabs",
     # Launch ============================
     # This it the launch/splash page page, when the Aurora app is first opened
     # Launch contains information to explain the app to users
@@ -38,7 +86,7 @@ ui <- fluidPage(
     tabPanel(
       "Launch",
       h3("Welcome to Aurora! 🐧"), # Penguin is a reference to SY Aurora (see FAQs)
-
+      
       # Top Row: Example data toggle & Citation Panel
       fluidRow(
         column(
@@ -68,11 +116,11 @@ ui <- fluidPage(
             br(),
             strong("GitHub repository:"),
             br(),
-            tags$a(href = "https://www.doi.org/", "https://www.doi.org/")
+            tags$a(href = "https://github.com/fvaux/aurora", "https://github.com/fvaux/aurora")
           )
         )
       ),
-
+      
       # Bottom Row: About Aurora & FAQs Panels
       fluidRow(
         column(
@@ -175,7 +223,7 @@ ui <- fluidPage(
             p("Dates are uploaded in the aurora_queue.xlsx file using separate year, month and day columns. The Aurora app uses these columns to create a new date column with a standardised YYYY-MM-DD format (saved as characters). The separate year, month and day columns are retained but are listed last in each table. If any information is missing, the app fills in the gaps using the current year and 1st January. This approach permits missing data information and avoids date formatting errors (including automated changes in Excel)."),
             p("Dates should be updated using the separate year, month and day columns. Date columns will be automatically updated when the app is launched."),
             strong("Can Aurora store other time information? ⌚💀"),
-            p("Aurora can record time in 24-hour hours and minutes for sample collection using sample_hour and sample_minute. On launch, Aurora converts these separate columns into the 24-hour HH:MM format."),
+            p("Aurora can record time in 24-hour hours and minutes for sample collection using sample_hour and sample_minute. Aurora does not currently use those columns for any features, but they could be converted into a 24-hour HH:MM format or combined with the date column if users customise the R code."),
             p("For simplicity's sake, the default version of the app does not record seconds or times for other columns. It also does not provide columns for things like the age estimates of fossils or radiometric dates."),
             strong("What is munge-proofing? 🧹"),
             p("When data is uploaded, Aurora conducts several 'munge-proofing' or transforming steps to prevent poorly formatted data (e.g. extra spaces or commas, and ways to handle missing data/NAs). When data is saved, it is kept in a 'munge-proof' format that inserts an underscore (_) before characters to prevent formatting errors. All data is saved as characters. When the app is launched, it loads the data into memory and transforms such columns into appropriate formats (e.g. numeric). Edits in memory can be sent back to the permanent files, which includes munge-proofing."),
@@ -186,7 +234,7 @@ ui <- fluidPage(
             strong("Does Aurora connect to the internet? 🌐"),
             p("No, while Aurora is a Shiny web application that can load in a web browser, it is offline and does not connect to the internet or any external databases. All data is kept in the RDS files."),
             strong("How do I report an error with Aurora? 🚨"),
-            p("Please raise a new issue in Aurora's GitHub repository (linked the to Zenodo archive)."),
+            p("Please raise a new issue in Aurora's GitHub repository."),
             strong("How can I share my own customised version of Aurora? 🛠️"),
             p("We recommend modifying a forked version Aurora's GitHub repository. Please remember to cite the app and our paper (linked above). We're excited to see what people create!"),
             strong("Why is it called Aurora? ❄️🥶"),
@@ -195,7 +243,7 @@ ui <- fluidPage(
         )
       )
     ),
-
+    
     # Search ============================
     # Used to search for samples across Data Tables
     tabPanel(
@@ -205,17 +253,17 @@ ui <- fluidPage(
           column(
             6,
             checkboxGroupInput("search_sp_need",
-              label = "Preset searches:",
-              choices = constants$search_sp_need,
-              selected = NULL
+                               label = "Preset searches:",
+                               choices = constants$search_sp_need,
+                               selected = NULL
             )
           ),
           column(
             6,
             checkboxGroupInput("search_box",
-              label = "Select data tables:",
-              choices = constants$table_names,
-              selected = constants$table_names
+                               label = "Select data tables:",
+                               choices = constants$table_names,
+                               selected = constants$table_names
             )
           )
         ),
@@ -223,10 +271,10 @@ ui <- fluidPage(
         p("🔍 All data tables selected by default, untick to restrict search by table. Preset searches are mutually exclusive, and they may require all tables to be selected."),
         p("Use text box below to hide and reveal columns across tables."),
         selectInput("SelectCol",
-          label = "Customise columns:",
-          choices = constants$template.colnames,
-          selected = template.selected,
-          multiple = TRUE
+                    label = "Customise columns:",
+                    choices = constants$template.colnames,
+                    selected = template.selected,
+                    multiple = TRUE
         ),
         width = 2
       ),
@@ -235,7 +283,7 @@ ui <- fluidPage(
         DTOutput("search_table") # ⚠️ If want smaller text use: div(DTOutput("search_table"), style = list("font-size:85%"))
       )
     ),
-
+    
     # Edit ============================
     # This page is used to edit samples across Data Tables
     # page can also be used to add or abandon/delete samples
@@ -243,36 +291,36 @@ ui <- fluidPage(
       "Edit",
       sidebarPanel(
         radioButtons("checkGroup",
-          label = "Select Data Table:",
-          choices = constants$table_names,
-          selected = "Sample Tracking"
+                     label = "Select Data Table:",
+                     choices = constants$table_names,
+                     selected = "Sample Tracking"
         ),
         hr(style = "border-color: #3B71C5"),
         p("📅 Change dates using year, month and day columns. Dates will automatically update when app is relaunched or data is toggled on the Launch page."),
         hr(style = "border-color: #3B71C5"),
         actionBttn("addRowEdit",
-          label = "Add Row",
-          size  = "xs",
-          style = "unite",
-          color = "primary",
-          icon  = icon("pen-square", lib = "font-awesome")
+                   label = "Add Row",
+                   size  = "xs",
+                   style = "unite",
+                   color = "primary",
+                   icon  = icon("pen-square", lib = "font-awesome")
         ),
         sliderInput("dupRowEdit",
-          label = NULL, #
-          min = 0,
-          max = 20,
-          step = 1,
-          value = 0
+                    label = NULL, #
+                    min = 0,
+                    max = 20,
+                    step = 1,
+                    value = 0
         ),
         h6("0: Add blank row(s) or"),
         h6("Duplicate 1 row x times"),
         hr(style = "border-color: #3B71C5"),
         actionBttn("SaveEdit",
-          label = "Save Edits",
-          size  = "sm",
-          style = "unite",
-          color = "primary",
-          icon  = icon("save", lib = "font-awesome")
+                   label = "Save Edits",
+                   size  = "sm",
+                   style = "unite",
+                   color = "primary",
+                   icon  = icon("save", lib = "font-awesome")
         ),
         hr(style = "border-color: #3B71C5"),
         p("Duplicates mode shows duplicate sample accession entries"),
@@ -290,11 +338,11 @@ ui <- fluidPage(
           status  = "danger"
         ),
         actionBttn("AbandonEdit",
-          label = "Abandon Samples",
-          size  = "sm",
-          style = "unite",
-          color = "danger",
-          icon  = icon("trash", lib = "font-awesome")
+                   label = "Abandon Samples",
+                   size  = "sm",
+                   style = "unite",
+                   color = "danger",
+                   icon  = icon("trash", lib = "font-awesome")
         ),
         width = 2
       ),
@@ -303,150 +351,130 @@ ui <- fluidPage(
         DTOutput("tbl") # ⚠️ if want smaller text use: div(DTOutput("tbl"), style = list("font-size:75%"))
       )
     ),
-
-
-    # Batch Edit ====
+    
+    
+    # Batch edit and move====
     tabPanel(
-      "Batch Edit (WIP)",
+      "Batch Edit and Move",
+      h3("Batch edit and move"),
+      fluidRow(
+        column(
+          12,
+          
+          wellPanel(
+            p("This page contains some features to simplify editing and moving storage containers for across many samples or extractions."),
+            p("These tools focus on units and boxes and do not affect intermediate storage levels (e.g. shelves, racks, slots). If sample or extract storage needs to be completely reorganised, we recommend using the Edit or Bulk Edit pages.")
+          )
+        )
+      ),
       
       fluidRow(
-        
         column(
-          3,
+          6,
           
-          selectInput(
-            "batch_table",
-            "Table",
-            choices = names(table_mapping)
-          ),
-          
-          selectInput(
-            "batch_match_col",
-            "Match column",
-            choices = NULL
-          ),
-          
-          selectInput(
-            "batch_match_val",
-            "Match value",
-            choices = NULL
-          ),
-          
-          selectInput(
-            "batch_edit_col",
-            "Column to edit",
-            choices = NULL
-          ),
-          
-          textInput(
-            "batch_new_val",
-            "New value"
-          ),
-          
-          br(),
-          
-          actionButton(
-            "batch_preview",
-            "Preview changes"
-          ),
-          
-          actionButton(
-            "batch_apply",
-            "Apply changes"
-          ),
-          
-          br(),
-          br(),
-          
-          textOutput("batch_rows_changed")
-          
+          wellPanel(
+            
+            h4("Batch edit"),
+            
+            p("Use batch edits to select and rename certain values within a particular accross all affected samples simultaneously. e.g. rename a freezer or sample storage box."),
+            
+            p("To mitigate potential erroneous edits across many samples, only a subset of columns focused on storage are batch editable by default."),
+            
+            selectInput(
+              "batch_editable_col",
+              "Batch editable columns",
+              choices = constants$batch_columns
+            ),
+            
+            textInput(
+              "batch_match_val",
+              "Look for all instances of this text:"
+            ),
+            
+            textInput(
+              "batch_edit_col",
+              "Change all found instances to this text:"
+            ),
+            
+            actionBttn(
+              "batch_apply",
+              label = "Confirm and apply this change",
+              size = "sm",
+              style = "unite",
+              color = "primary",
+              icon = icon("save", lib = "font-awesome")
+            ),
+            
+            br(),
+            br(),
+            
+            textOutput("batch_rows_changed")
+          )
         ),
         
+        
+        # Move storage boxes
         column(
-          9,
-          DT::dataTableOutput("batch_preview_table")
+          6,
+          
+          wellPanel(
+            
+            h4("Move boxes"),
+            
+            p("Move all samples or extractions in a selected storage box from one storage unit (e.g. freezer) to another."),
+            
+            p("Box names should be unique within each storage unit to avoid confusion."),
+            
+            radioButtons(
+              "move_box_type",
+              label = "Select storage type:",
+              choices = c(
+                "Samples" = "storage",
+                "Extractions" = "extract"
+              ),
+              selected = "storage"
+            ),
+            
+            selectInput(
+              "move_current_unit",
+              label = "Select current storage unit:",
+              choices = NULL
+            ),
+            
+            selectInput(
+              "move_box_select",
+              label = "Select box:",
+              choices = NULL
+            ),
+            
+            selectizeInput(
+              "move_unit_dest",
+              label = "Select or create destination storage unit:",
+              choices = NULL,
+              options = list(
+                create = TRUE
+              )
+            ),
+            
+            actionBttn(
+              "move_box_apply",
+              label = "Confirm and move this box",
+              size = "sm",
+              style = "unite",
+              color = "primary",
+              icon = icon("truck-moving", lib = "font-awesome")
+            ),
+            
+            br(),
+            br(),
+            
+            textOutput("move_box_rows_changed")
+          )
         )
         
       )
     ),
     
-    # Move Boxes ============================
-    # This page is for moving or renaming boxes
-    tabPanel(
-      "Move Boxes (WIP)",
-      br(),
-      column(
-        3,
-        wellPanel(
-          h4("Move Box to Shelf (e.g. shelf or drawer):"),
-          br(),
-          selectInput("moveBoxSelect",
-            label   = "Select Box",
-            choices = values$boxChoices_samples,
-          ),
-          br(),
-          selectizeInput("moveshelfdest",
-            label = "Select/Create Shelf (e.g. shelf or drawer)",
-            choices = values$shelfChoices_samples,
-            options = list(create = TRUE)
-          ),
-          br(),
-          actionBttn("moveBoxtoShelf",
-            label = "Move Box",
-            size = "sm",
-            color = "primary",
-            icon = icon("truck-moving", lib = "font-awesome")
-          ),
-        )
-      ),
-      column(
-        3,
-        wellPanel(
-          h4("Rename a Box:"),
-          br(),
-          selectInput("moveBoxSelect2",
-            label   = "Select Box",
-            choices = values$boxChoices_samples
-          ),
-          br(),
-          textInput("moveBoxRename",
-            label = "Rename box:"
-          ),
-          br(),
-          actionBttn("moveRenameBox",
-            label = "Rename Box",
-            size = "sm",
-            style = "unite",
-            color = "primary",
-            icon = icon("pen-square", lib = "font-awesome")
-          ),
-        )
-      ),
-      column(
-        3,
-        wellPanel(
-          h4("Rename a Shelf (e.g. shelf or drawer):"),
-          br(),
-          selectInput("moveShelfSelect",
-            label   = "Select Shelf",
-            choices = values$shelfChoices_samples
-          ),
-          br(),
-          textInput("moveshelfRename",
-            label = "Rename Shelf:"
-          ),
-          br(),
-          actionBttn("moveRenameUnit",
-            label = "Rename Unit",
-            size = "sm",
-            style = "unite",
-            color = "primary",
-            icon = icon("pen-square", lib = "font-awesome")
-          ),
-        )
-      )
-    ),
-
     # Bulk Edit ============================
     # Used to export and import each Data Table .rds file for manual bulk editing in Excel or a text editor
     # See Edit page for editing smaller numbers of samples more safely
@@ -504,11 +532,11 @@ ui <- fluidPage(
             p("Newly uploaded files should appear automatically. You may need to refresh a page by pressing a button."),
             br(),
             actionBttn("Upload",
-              label = "Upload",
-              size = "lg",
-              style = "unite",
-              color = "danger",
-              icon = icon("file-arrow-up", lib = "font-awesome")
+                       label = "Upload",
+                       size = "lg",
+                       style = "unite",
+                       color = "danger",
+                       icon = icon("file-arrow-up", lib = "font-awesome")
             ),
             br(),
             br(),
@@ -522,7 +550,7 @@ ui <- fluidPage(
         )
       )
     ),
-
+    
     # Export ============================
     # Used to export samples (or other data) in various formats
     tabPanel(
@@ -535,38 +563,38 @@ ui <- fluidPage(
             p("Export data from Aurora in different file formats"),
             p("Prepare data first before selecting file to export."),
             actionBttn("generateData",
-              label = "Prepare Data",
-              size = "sm",
-              style = "unite",
-              color = "warn",
-              icon = icon("refresh", lib = "font-awesome")
+                       label = "Prepare Data",
+                       size = "sm",
+                       style = "unite",
+                       color = "warn",
+                       icon = icon("refresh", lib = "font-awesome")
             ),
             hr(style = "border-color: #3B71C5"),
             h4("Export all samples 🪲⬇️"),
             p("Exports all data"),
             actionBttn("exportSamples",
-              label = ".csv and .rds formats",
-              size = "sm",
-              style = "unite",
-              color = "success",
-              icon = icon("file-export", lib = "font-awesome")
+                       label = ".csv and .rds formats",
+                       size = "sm",
+                       style = "unite",
+                       color = "success",
+                       icon = icon("file-export", lib = "font-awesome")
             ),
             br(),
             hr(style = "border-color: #3B71C5"),
             h4("Export all sequenced samples 🧬⬇️"),
             p("Exports all data for sequenced samples"),
             actionBttn("exportSequenced",
-              label = ".csv and .rds formats",
-              size = "sm",
-              style = "unite",
-              color = "success",
-              icon = icon("file-export", lib = "font-awesome")
+                       label = ".csv and .rds formats",
+                       size = "sm",
+                       style = "unite",
+                       color = "success",
+                       icon = icon("file-export", lib = "font-awesome")
             ),
           )
         )
       )
     ),
-
+    
     # Dashboard ============================
     # Used to evaluate statistics tracking the Aurora database
     # i.e. how many samples (and other data) stored in the Aurora database
@@ -580,11 +608,11 @@ ui <- fluidPage(
           wellPanel(
             p("Evaluate Aurora database using Dashboard"),
             actionBttn("generate_dashboard",
-              label = "Refresh data",
-              size = "sm",
-              style = "unite",
-              color = "warn",
-              icon = icon("refresh", lib = "font-awesome")
+                       label = "Refresh data",
+                       size = "sm",
+                       style = "unite",
+                       color = "warn",
+                       icon = icon("refresh", lib = "font-awesome")
             )
           )
         )
@@ -604,7 +632,8 @@ ui <- fluidPage(
       p("table_SampleTracking exists to track changes in the Data Tables (it is not a sample Data Table)"),
       tableOutput("uniques.Taxonomy"),
     ),
-
+    
+    # Reporting ============================
     # Filter data ============================
     # Used to prepare and filter data (i.e. generates report_data)
     # report_data then used by storage, diversity, geography, timeline and report pages
@@ -620,11 +649,11 @@ ui <- fluidPage(
               p("The Filter page provides data for the Storage, Diversity, Map and Report pages, which are used to generate reports. None of these pages edit the actual Aurora database."),
               p("⚠️ Use the Export page to export full data from Aurora"),
               actionBttn("generateReportData",
-                label = "Load data for reporting",
-                size = "sm",
-                style = "unite",
-                color = "warning",
-                icon = icon("refresh")
+                         label = "Load data for reporting",
+                         size = "sm",
+                         style = "unite",
+                         color = "warning",
+                         icon = icon("refresh")
               ),
               hr(style = "border-color: #3B71C5"),
               uiOutput("multi_filter_ui")
@@ -638,7 +667,7 @@ ui <- fluidPage(
         )
       )
     ),
-
+    
     # Storage ==============================
     # Used to visualise and assess the storage of samples and extractions in report_data
     # e.g. where are a project's samples kept, or what is stored in a particular freezer
@@ -652,20 +681,20 @@ ui <- fluidPage(
             wellPanel(
               p("Explore storage of samples and extractions in report data"),
               actionBttn("refresh_storage",
-                label = "Refresh report data",
-                size = "sm",
-                style = "unite",
-                color = "warning",
-                icon = icon("refresh")
+                         label = "Refresh report data",
+                         size = "sm",
+                         style = "unite",
+                         color = "warning",
+                         icon = icon("refresh")
               ),
               br(),
               br(),
               actionBttn("generate_all_figs",
-                label = "Generate tables and figures",
-                size = "sm",
-                style = "unite",
-                color = "warning",
-                icon = icon("chart-bar")
+                         label = "Generate tables and figures",
+                         size = "sm",
+                         style = "unite",
+                         color = "warning",
+                         icon = icon("chart-bar")
               )
             )
           ),
@@ -699,7 +728,7 @@ ui <- fluidPage(
         )
       )
     ),
-
+    
     # Diversity =========================================
     # Used to assess the taxonomic diversity of samples in report_data
     tabPanel(
@@ -741,7 +770,7 @@ ui <- fluidPage(
               )
             )
           ),
-
+          
           # Right Column (Outputs) - Structure is updated
           column(
             8,
@@ -749,7 +778,7 @@ ui <- fluidPage(
             h4("Diversity Histogram"),
             plotlyOutput("diversity_plot"),
             tags$hr(), # Add a separator for better visual grouping
-
+            
             # 2. Table second
             h4("Diversity Summary Table"),
             dataTableOutput("diversity_summary_table")
@@ -757,7 +786,7 @@ ui <- fluidPage(
         )
       )
     ),
-
+    
     # Geography =========================================
     # Used to map and assess the spatial distribution of samples in report_data
     tabPanel(
@@ -815,7 +844,7 @@ ui <- fluidPage(
           )
         )
       ),
-
+      
       # Map output
       fluidRow(
         column(
@@ -825,7 +854,7 @@ ui <- fluidPage(
         )
       ),
       tags$hr(),
-
+      
       # Geography table
       fluidRow(
         column(
@@ -835,7 +864,7 @@ ui <- fluidPage(
         )
       )
     ),
-
+    
     # Sample variation =========================================
     # Used to assess variation in sample characteristics within report_data
     tabPanel(
@@ -948,7 +977,7 @@ ui <- fluidPage(
         )
       )
     ),
-
+    
     # Report ======================================
     # Used to export reports using report_data
     # Reports can be interactive .html reports, Excel files or .html maps files

@@ -1,7 +1,8 @@
-# Aurora, version 1 - Hopelessly homeless
-# Date: 2025.04.03
+# Aurora, version 0.1
+# Date: 2026.08.21
 
 # Developers: Grant Abernethy and Felix Zareie-Vaux
+# GitHub: https://github.com/fvaux/aurora
 # Please cite: PUBLICATION DETAILS AND DOI HERE
 
 # About Aurora ====
@@ -17,7 +18,7 @@
 # In addition, many functions are separated in .R files saved in the R folder of the app
 
 # All R scripts are annotated
-# roxygen2 type documentation is provided for all functions (except a few simple error messages)
+# roxygen2 style documentation is provided for all functions (except a few simple error messages)
 # Annotations marked with ⚠️ indicate a warning or a note regarding user customisation of the app
 # Annotations marked with 🚨 indicate a known issue or bug
 # Annotations marked with 🌱 indicate sections of code noted for future development
@@ -27,55 +28,27 @@ shinyApp(ui = ui, server = server) # Run this command to launch the Aurora app
 
 
 # Development to do list ====
+## Minor tasks before manuscript submission ====
+# Check that launch page text and readme file for GitHub align with manuscript text
+# Record quick youtube tutorial and add thumbnail link to GitHub readme
 
-## General tasks ====
-# Update/add to Example Data to ensure all columns demonstrated
+# Publish Zenodo release version of app (v1.0)
+# Update date and version at top of this file to match GitHub
+
+# If accepted: update publication details in this file and UI.
+
+## Example data ====
+# Update/add to Example Data to ensure all columns demonstrated (use AI)
 # Generate Example data report and Excel file
 
-# Make empty/clean sample_tracking and last_date RDS files for public release
+## Shortcut ====
+# Grant to make .bat Windows shortcut file
+# Using SY Aurora vessel photo from Wikipedia/Wikicommons?
 
-# Check all library packages are required
-
-# Check backup features (and update folder and file names?)
-
-## Time data ====
-# Update formatDataTables.R to process:
-# sample_hour (0 to 23, no negative numbers)  
-# sample_minute (0 - 59, no negative numbers)
-# Then make 'provenance_time' column combining sample_hour and sample_minute
-
-## bslib theme ====
-# Change to bslib theme <-- PAUSED
-# bslib version 5 not compatible with various functions
-# 🚨 Have tried this, but rending of side panel (e.g. filtering options) on Filter page is failing under bslib
-# Don't want to fix with CSS overrides
-# ⚠️ When bslib applied, use sidebarLayout to render table parallel with sidebar on Search and Edit pages (works once implemented)
-
-## Move boxes page ====
-# Replace with 'batch edit' page
-
-## Geography page ====
-# Move summary table production to geographyfunctions.r?
-
-# Add drop-down menu for changing colours of points on map? (red, orange, yellow, green, cyan, blue, black, white)
-
-## Report page and reports ====
-# Finish Report page (pivot summary table, general table, map, timeline)
-
-# Search page function to restrict data in other edits <-- DONE - using Filter page
-# Report needs to use "report_data" <-- DONE
-# Users select samples using filter page <-- DONE
-# "report_table" saves that search to global <-- DONE
-# Need separate R files for plotly functions <-- DONE
-# UI to select markdown template (has to be a test if plot is null, go and make it) <-- DONE
-# Put generated plots in a reactive value called reportItems e.g. reportItems$plot1 <-- DONE
-# Then use that reactive value in the reports <-- DONE
-
+## Check for possible bugs ====
 #  ⚠️ Need to check order of operations/how report_data formed. 
 # e.g. Had to  add date formation into generate_export_data(), instead of relying on launch's own getdate()
 # Also, this step means that date columns are in different order to default.cols 
 
-#  🚨 report_data does not have taxonomy information for the Example data
-# Maybe an order of operations issue with taxonomy on launch vs report_data?
-
-# Need to move Report functions from server to reportfunctions.r, without breaking anything
+#  🚨 report_data does not have taxonomy information for the ***Example data***
+# Maybe an order of operations issue with taxonomy on report_data?
