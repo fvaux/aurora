@@ -157,9 +157,23 @@ bulk_import_table <- function(table_key, fpath_fn, mungepath, examplepath) {
   if (!is.null(infile)) {
     infile <- infile %>% mungeReverse()
     
-    assign(table_mapping[table_key], infile, envir = .GlobalEnv)
-    saveRDS(infile, file = paste0(fpath_fn(), table_mapping[table_key], ".rds"))
-    return(TRUE)
+    table_name <- unname(table_mapping[table_key])
+    saved <- safesave(
+      data = infile,
+      filepath = fpath_fn(),
+      file = table_name,
+      toastr = FALSE
+    )
+
+    if (isTRUE(saved)) {
+      assign(table_name, infile, envir = .GlobalEnv)
+      toastr_success("Bulk edit imported and saved", position = "bottom-left")
+      return(TRUE)
+    }
+
+    toastr_warning("Bulk edit NOT saved: file changed on disk. Restart Aurora before retrying.",
+                   position = "bottom-left")
+    return(FALSE)
   }
   
   return(FALSE)

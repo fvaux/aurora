@@ -60,6 +60,9 @@ table_mapping <- c(
   "Publication" = "table_Publication" # Publications/reports associated with samples
 )
 
+# Data and modification timestamps are loaded together by loadprimarydata()
+# below, after default.cols has been defined.
+
 # Define columns ============================
 # default.cols defines the default sorting of columns/fields within each Data Table
 # Sorting used here is default sorting shown in app's tables (e.g. Search and Edit pages)
@@ -182,7 +185,7 @@ sp_needs <- c(
 #' )
 generate_taxonomy_table <- function(classification_table, taxonomypath) {
   taxonomy_table <- read_excel(taxonomypath, sheet = 1)
-
+  
   # Create species_lookup with sample_accession, species_binomial, genus, and family
   species_lookup <- table_SampleClassification %>%
     transmute(
@@ -191,7 +194,7 @@ generate_taxonomy_table <- function(classification_table, taxonomypath) {
       family,
       species_binomial
     )
-
+  
   # Ensure taxonomy table has only unique rows per species_binomial, genus, family
   taxonomy_species <- taxonomy_table %>%
     filter(!is.na(species_binomial)) %>%
@@ -202,13 +205,13 @@ generate_taxonomy_table <- function(classification_table, taxonomypath) {
   taxonomy_family <- taxonomy_table %>%
     filter(!is.na(family)) %>%
     distinct(family, .keep_all = TRUE)
-
+  
   # Step 1: Match samples based on species_binomial
   matched_species <- species_lookup %>%
     filter(!is.na(species_binomial)) %>%
     select(sample_accession, species_binomial) %>%
     left_join(taxonomy_species, by = "species_binomial")
-
+  
   # Step 2: Match samples based on genus (only unmatched so far)
   matched_genus <- species_lookup %>%
     filter(!(sample_accession %in% matched_species$sample_accession)) %>%
@@ -218,7 +221,7 @@ generate_taxonomy_table <- function(classification_table, taxonomypath) {
     mutate(
       species_binomial = NA_character_ # Clear species_binomial for genus-only matches
     )
-
+  
   # Step 3: Match samples based on family (only unmatched so far)
   matched_family <- species_lookup %>%
     filter(!(sample_accession %in% c(matched_species$sample_accession, matched_genus$sample_accession))) %>%
@@ -229,12 +232,12 @@ generate_taxonomy_table <- function(classification_table, taxonomypath) {
       genus = NA_character_, # Clear genus and species_binomial for family-only matches
       species_binomial = NA_character_
     )
-
+  
   # Record the taxonomic level used to match samples
   matched_species <- matched_species %>% mutate(match_level = "species_binomial")
   matched_genus <- matched_genus %>% mutate(match_level = "genus")
   matched_family <- matched_family %>% mutate(match_level = "family")
-
+  
   bind_rows(matched_species, matched_genus, matched_family)
 }
 
@@ -319,6 +322,14 @@ t <- tibble_row(
 # ⚠️ table_tracker does not self-deleted, users must manually clear or delete to remove existing data
 table_Tracker <- readRDS(paste0(filepath, "table_Tracker.rds")) %>% bind_rows(t)
 saveRDS(table_Tracker, paste0(filepath, "table_Tracker.rds"))
+# safesave(
+#   data = table_Tracker,
+#   filepath = filepath,
+#   file = "table_Tracker",
+#   toastr = FALSE    # because toaster cant work in global since the reactive shiny app hasn’t started yet) 
+# )
+
+
 
 # Autobackup ============================
 last.date <- readRDS(paste0(filepath, "LastSaveDate.rds"))
@@ -342,6 +353,13 @@ if (today - last.date > 2) {
     file = (paste0("./Autobackups/Autobackup ", today, ".RData"))
   )
   saveRDS(today, file = (paste0(filepath, "LastSaveDate.rds")))
+  # safesave(
+  #   data = today,
+  #   filepath = filepath,
+  #   file = "LastSaveDate",
+  #   toastr = FALSE    # because toaster cant work in global since the reactive shiny app hasn’t started yet) 
+  # )
+  
 }
 
 # This periodically backs up samples/entries abandoned via the Edit page

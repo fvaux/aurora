@@ -8,12 +8,12 @@ server <- function(input, output, session) {
     tables = list(),
     plots = list()
   )
-
+  
   # Launch page ============================
   # This it the launch/splash page page, when the Aurora app is first opened
   # Launch contains information to explain the app to users
   # The page also contains a toggle to switch between user data and the example data
-
+  
   fpath <- reactive({
     if (input$include_examples == TRUE) {
       examplepath
@@ -21,33 +21,42 @@ server <- function(input, output, session) {
       filepath
     }
   })
-
+  
   # Toggle to switch between user data and example data
   observeEvent(input$include_examples, {
-    loadprimarydata(table_mapping, fpath())
-    toastr_success("Data Switched", position = "bottom-left")
+    # Reload the selected dataset and its modification timestamps together.
+    # Note: Aurora still uses shared global tables; this is not session isolation.
+    tryCatch({
+      loadprimarydata(table_mapping, fpath())
+      toastr_success("Data Switched", position = "bottom-left")
+    }, error = function(e) {
+      toastr_error(
+        paste("Could not switch data:", conditionMessage(e)),
+        position = "bottom-left"
+      )
+    })
   })
-
-
+  
+  
   # Search page ============================
   # Used to search for samples across Data Tables
   # Get the first table selected by widget, then if there's more than 1, left_join the others, and select just the columns in the customize columns box
   # 🌱 Can we make preset searches (formerly special cases) use mutually exclusive radio buttons, not tick boxes? Should prevent >1 selected at a time
   # 🌱 Can we make a 'All data' option for 'Select data'? Options currently from global constants
-
+  
   # Pre-populate the default list of columns for viewing
   observeEvent(input$search_box,
-    {
-      cols <- get_column_choices(input$search_box, constants)
-      updateSelectInput(session,
-        inputId = "SelectCol",
-        choices = cols$all,
-        selected = cols$default
-      )
-    },
-    ignoreNULL = FALSE
+               {
+                 cols <- get_column_choices(input$search_box, constants)
+                 updateSelectInput(session,
+                                   inputId = "SelectCol",
+                                   choices = cols$all,
+                                   selected = cols$default
+                 )
+               },
+               ignoreNULL = FALSE
   )
-
+  
   # Generate a table for viewing
   output$search_table <- renderDT(
     {
@@ -63,15 +72,15 @@ server <- function(input, output, session) {
     options = list(search = list(regex = TRUE)),
     filter = list(position = "top", clear = FALSE, plain = TRUE)
   )
-
+  
   # Make a proxy table for display
   search_proxy <- dataTableProxy("search_table")
-
+  
   # Edit page ============================
   # Used to edit samples across Data Tables
   # Safest way to edit samples once they've been uploaded into Aurora
   # See Bulk edit page for editing many samples
-
+  
   # Render editable table
   output$tbl <- renderDT({
     xdt <- get_edit_table(
@@ -79,7 +88,7 @@ server <- function(input, output, session) {
       table_mapping = table_mapping,
       duplicate_mode = input$DuplicateMode
     )
-
+    
     datatable(
       data = xdt,
       selection = "multiple",
@@ -88,10 +97,10 @@ server <- function(input, output, session) {
       options = list(search = list(regex = TRUE))
     )
   })
-
+  
   # DataTable proxy
   tblproxy <- dataTableProxy("tbl")
-
+  
   # Add rows
   observeEvent(input$addRowEdit, {
     s <- input$tbl_rows_selected
@@ -107,7 +116,7 @@ server <- function(input, output, session) {
       toastr_warning("Select a row!", position = "bottom-left")
     }
   })
-
+  
   # Abandon rows
   observeEvent(input$AbandonEdit, {
     s <- input$tbl_rows_selected
@@ -122,74 +131,93 @@ server <- function(input, output, session) {
       )
     }
   })
-
+  
   # Cell editing
   observeEvent(input$tbl_cell_edit, {
     xdt <- get(table_mapping[input$checkGroup], envir = .GlobalEnv)
     xdt <- editData(xdt, input$tbl_cell_edit, "tbl", rownames = FALSE)
     assign(table_mapping[input$checkGroup], xdt, envir = .GlobalEnv)
   })
-
+  
   # Save edits
   observeEvent(input$SaveEdit, {
     save_edits(input$checkGroup, table_mapping, fpath)
   })
-
+  
   
   # Upload page ============================
   # Used to upload data from the aurora_queue.xlsx Excel file'Upload' page
   # This is the safest way to upload many samples, as the upload functions do many formatting checks
-
+  
   observeEvent(input$Upload, {
     print("Importing new samples...")
-
+    
     upload_new_samples(
       constants = constants,
       table_mapping = table_mapping,
       fpath = fpath # Pass the reactive itself, not fpath()
     )
   })
-
+  
   # Export page ============================
   # Used to export samples (or other data) in various formats
   # This is for data export - for reports, see Report page
-
+  
   export_data <- reactiveValues(df = NULL)
-
+  
   # Generate export dataset
   observeEvent(input$generateData, {
     toastr_warning("Generating data", position = "bottom-left")
-
+    
     export_data$df <- generate_export_data()
-
+    
     toastr_success("Data generated", position = "bottom-left")
   })
-
+  
   # Export all samples
   observeEvent(input$exportSamples, {
     if (is.null(export_data$df)) {
       toastr_error("No data available. Please generate data first.", position = "bottom-left")
       return()
     }
-
+    
     toastr_warning("Exporting all samples", position = "bottom-left")
     export_dataset(export_data$df, "all_samples")
     toastr_success("Saved to Export folder", position = "bottom-left")
   })
-
+  
   # Export sequenced samples
   observeEvent(input$exportSequenced, {
     if (is.null(export_data$df)) {
       toastr_error("No data available. Please generate data first.", position = "bottom-left")
       return()
     }
-
+    
     toastr_warning("Exporting sequenced samples", position = "bottom-left")
     filtered_df <- filter_sequenced_samples(export_data$df)
     export_dataset(filtered_df, "sequenced_samples")
     toastr_success("Saved to Export folder", position = "bottom-left")
   })
-
+  
+  # Label exports: full database, saved in Export folder
+  observeEvent(input$export_sample_labels, {
+    tryCatch({
+      destination <- export_label_data("sample", exportpath)
+      toastr_success(paste("Saved:", basename(destination)), position = "bottom-left")
+    }, error = function(e) {
+      toastr_error(paste("Label export failed:", conditionMessage(e)), position = "bottom-left")
+    })
+  })
+  
+  observeEvent(input$export_extract_labels, {
+    tryCatch({
+      destination <- export_label_data("extract", exportpath)
+      toastr_success(paste("Saved:", basename(destination)), position = "bottom-left")
+    }, error = function(e) {
+      toastr_error(paste("Label export failed:", conditionMessage(e)), position = "bottom-left")
+    })
+  })
+  
   # 🌱 Need to make these new output formats
   # Export all sequenced samples for GenBank (.xlsx)
   # exportGenBank
@@ -220,23 +248,26 @@ server <- function(input, output, session) {
         new_val = new_val
       )
       
-      table_SampleStorage <- result$data
-      
-      assign(
-        "table_SampleStorage",
-        table_SampleStorage,
-        envir = .GlobalEnv
+      updated_data <- result$data
+      saved <- safesave(
+        data = updated_data,
+        filepath = fpath(),
+        file = "table_SampleStorage",
+        toastr = FALSE
       )
       
-      saveRDS(
-        table_SampleStorage,
-        file = paste0(filepath, "table_SampleStorage.rds")
-      )
-      
-      toastr_success(
-        paste(result$rows_changed, "sample records updated"),
-        position = "bottom-left"
-      )
+      if (isTRUE(saved)) {
+        assign("table_SampleStorage", updated_data, envir = .GlobalEnv)
+        toastr_success(
+          paste(result$rows_changed, "sample records updated"),
+          position = "bottom-left"
+        )
+      } else {
+        toastr_warning(
+          "Not saved: the data file has changed. Restart Aurora before editing again.",
+          position = "bottom-left"
+        )
+      }
       
     } else if (x == "extract") {
       
@@ -247,23 +278,26 @@ server <- function(input, output, session) {
         new_val = new_val
       )
       
-      table_Extraction <- result$data
-      
-      assign(
-        "table_Extraction",
-        table_Extraction,
-        envir = .GlobalEnv
+      updated_data <- result$data
+      saved <- safesave(
+        data = updated_data,
+        filepath = fpath(),
+        file = "table_Extraction",
+        toastr = FALSE
       )
       
-      saveRDS(
-        table_Extraction,
-        file = paste0(filepath, "table_Extraction.rds")
-      )
-      
-      toastr_success(
-        paste(result$rows_changed, "extract records updated"),
-        position = "bottom-left"
-      )
+      if (isTRUE(saved)) {
+        assign("table_Extraction", updated_data, envir = .GlobalEnv)
+        toastr_success(
+          paste(result$rows_changed, "extract records updated"),
+          position = "bottom-left"
+        )
+      } else {
+        toastr_warning(
+          "Not saved: the data file has changed. Restart Aurora before editing again.",
+          position = "bottom-left"
+        )
+      }
       
     } else {
       
@@ -374,23 +408,26 @@ server <- function(input, output, session) {
         return()
       }
       
-      table_SampleStorage <- result$data
-      
-      assign(
-        "table_SampleStorage",
-        table_SampleStorage,
-        envir = .GlobalEnv
+      updated_data <- result$data
+      saved <- safesave(
+        data = updated_data,
+        filepath = fpath(),
+        file = "table_SampleStorage",
+        toastr = FALSE
       )
       
-      saveRDS(
-        table_SampleStorage,
-        file = paste0(filepath, "table_SampleStorage.rds")
-      )
-      
-      toastr_success(
-        paste(result$rows_changed, "sample records updated"),
-        position = "bottom-left"
-      )
+      if (isTRUE(saved)) {
+        assign("table_SampleStorage", updated_data, envir = .GlobalEnv)
+        toastr_success(
+          paste(result$rows_changed, "sample records updated"),
+          position = "bottom-left"
+        )
+      } else {
+        toastr_warning(
+          "Not saved: the data file has changed. Restart Aurora before editing again.",
+          position = "bottom-left"
+        )
+      }
       
       
       # Extractions
@@ -416,23 +453,26 @@ server <- function(input, output, session) {
         return()
       }
       
-      table_Extraction <- result$data
-      
-      assign(
-        "table_Extraction",
-        table_Extraction,
-        envir = .GlobalEnv
+      updated_data <- result$data
+      saved <- safesave(
+        data = updated_data,
+        filepath = fpath(),
+        file = "table_Extraction",
+        toastr = FALSE
       )
       
-      saveRDS(
-        table_Extraction,
-        file = paste0(filepath, "table_Extraction.rds")
-      )
-      
-      toastr_success(
-        paste(result$rows_changed, "extract records updated"),
-        position = "bottom-left"
-      )
+      if (isTRUE(saved)) {
+        assign("table_Extraction", updated_data, envir = .GlobalEnv)
+        toastr_success(
+          paste(result$rows_changed, "extract records updated"),
+          position = "bottom-left"
+        )
+      } else {
+        toastr_warning(
+          "Not saved: the data file has changed. Restart Aurora before editing again.",
+          position = "bottom-left"
+        )
+      }
       
     } else {
       
@@ -478,22 +518,22 @@ server <- function(input, output, session) {
     )
     
   })
-
+  
   # Bulk edit page ============================
   # Used to export and import each Data Table .rds file for manual bulk editing in Excel or a text editor
   # See Edit page for editing smaller numbers of samples more safely
-
+  
   observeEvent(input$UtilsExport, {
     toastr_warning("Export Underway...", position = "bottom-left")
     bulk_export_table(input$UtilscheckGroup, fpath, examplepath)
     toastr_success("Exported", position = "bottom-left")
   })
-
+  
   observeEvent(input$UtilsImport, {
     if (input$UtilsConfirm == TRUE) {
       toastr_warning("Import Underway...", position = "bottom-left")
       success <- bulk_import_table(input$UtilscheckGroup, fpath, mungepath, examplepath)
-
+      
       if (success) {
         toastr_success("Imported", position = "bottom-left")
       }
@@ -501,50 +541,50 @@ server <- function(input, output, session) {
       toastr_warning("Select Table; Enable Import!", position = "bottom-left")
     }
   })
-
+  
   # Dashboard page ============================
   # Used to evaluate statistics tracking the Aurora database
   # i.e. how many samples (and other data) stored in the Aurora database
   # Can use plots to identify if significant uploads or deletions have occurred
-
+  
   # Reactive value to store dashboard_data
   dashboard_data <- reactiveVal(NULL)
-
+  
   # Generate data on button press
   observeEvent(input$generate_dashboard, {
     dashboard_data(generate_dashboard_data())
   })
-
+  
   # Ensure there's initial data
   observe({
     if (is.null(dashboard_data())) {
       dashboard_data(generate_dashboard_data())
     }
   })
-
+  
   # Timeline plot
   output$accumulation_plot <- renderPlotly({
     req(dashboard_data())
     generate_accumulation_plot(dashboard_data())
   })
-
+  
   # Tracker plot
   output$tableTally1 <- renderPlotly({
     generate_tracker_plot(table_Tracker)
   })
-
+  
   # Index purity table
   output$uniques.Taxonomy <- renderTable({
     generate_index_purity_table()
   })
-
-
+  
+  
   # Filter page  ============================
   # Used to prepare and filter data (i.e. generates report_data)
   # report_data then used by storage, diversity, geography, timeline and report pages
-
+  
   report_data <- reactiveValues(df = NULL)
-
+  
   values$reportFilterColumns <- c(
     "project", "project_code", "key_word",
     "family", "genus", "species_binomial", "common_group", "common_name",
@@ -553,25 +593,25 @@ server <- function(input, output, session) {
     "political_country", "political_state", "geographic_region", "geographic_subregion",
     "sequencing_run", "key_publication"
   )
-
+  
   # Generate base dataset
   observeEvent(input$generateReportData, {
     toastr_warning("Generating data", position = "bottom-left")
-
+    
     # Unified dataset generator — uses date-safe joins
     new_data <- generate_export_data()
-
+    
     # Save to reactiveValues and global for reuse
     report_data$df <- new_data
     assign("report_data", report_data$df, envir = .GlobalEnv)
-
+    
     toastr_success("Data generated", position = "bottom-left")
   })
-
+  
   # Dynamic filter UI
   output$multi_filter_ui <- renderUI({
     req(report_data$df)
-
+    
     tagList(
       h4("Filter by:"),
       lapply(values$reportFilterColumns, function(col) {
@@ -587,12 +627,12 @@ server <- function(input, output, session) {
       actionButton("resetAllFilters", "Clear all filters", icon = icon("undo"), class = "btn-warning w-100")
     )
   })
-
+  
   # Filtering logic
   filtered_df <- reactive({
     req(report_data$df)
     df <- report_data$df
-
+    
     # Loop over all filter inputs dynamically
     for (col in values$reportFilterColumns) {
       input_id <- paste0("filter_", col)
@@ -601,11 +641,11 @@ server <- function(input, output, session) {
         df <- df[df[[col]] %in% vals, , drop = FALSE]
       }
     }
-
+    
     assign("report_data", df, envir = .GlobalEnv)
     df
   })
-
+  
   # Reset filters
   observeEvent(input$resetAllFilters, {
     lapply(values$reportFilterColumns, function(col) {
@@ -614,13 +654,13 @@ server <- function(input, output, session) {
     assign("report_data", report_data$df, envir = .GlobalEnv)
     toastr_info("All filters cleared — showing all data", position = "bottom-left")
   })
-
+  
   # Add filtered data to reportItems for export
   observe({
     req(filtered_df())
     reportItems$tables[["All sample data"]] <- filtered_df()
   })
-
+  
   # Table display
   output$report_filtered_table <- renderDT({
     req(filtered_df())
@@ -630,14 +670,14 @@ server <- function(input, output, session) {
       caption = "All sample data"
     )
   })
-
+  
   # Storage page ==================================
   # Used to visualise and assess the storage of samples and extractions in report_data
   # e.g. where are a project's samples kept, or what is stored in a particular freezer
-
+  
   # Reactive value to store storage_data
   storage_data <- reactiveVal(NULL)
-
+  
   # Refresh Button
   observeEvent(input$refresh_storage, {
     if (exists("report_data", envir = .GlobalEnv)) {
@@ -648,12 +688,12 @@ server <- function(input, output, session) {
       showNotification("No report data found. Please generate it first in the Filter page.", type = "error")
     }
   })
-
+  
   # Generate Figures + Tables
   observeEvent(input$generate_all_figs, {
     dat <- storage_data()
     req(dat) # Require data before proceeding
-
+    
     # Sample storage table
     # Lists unique boxes per sample storage unit
     sample_table <- dat %>%
@@ -664,7 +704,7 @@ server <- function(input, output, session) {
         .groups = "drop"
       ) %>%
       filter(!is.na(storage_unit) & !is.na(storage_box))
-
+    
     output$sample_storage_table <- renderDT({
       datatable(
         sample_table,
@@ -674,8 +714,8 @@ server <- function(input, output, session) {
       )
     })
     reportItems$tables$sample_storage_table <- sample_table
-
-
+    
+    
     # Extraction storage table
     # Lists unique boxes per extract storage unit
     extract_table <- dat %>%
@@ -686,7 +726,7 @@ server <- function(input, output, session) {
         .groups = "drop"
       ) %>%
       filter(!is.na(extract_unit) & !is.na(extract_box))
-
+    
     output$extract_storage_table <- renderDT({
       datatable(
         extract_table,
@@ -696,7 +736,7 @@ server <- function(input, output, session) {
       )
     })
     reportItems$tables$extract_storage_table <- extract_table
-
+    
     # Sample Inventory Table
     # Lists storage information for every sample within report_data
     sample_inventory_cols <- c(
@@ -704,12 +744,12 @@ server <- function(input, output, session) {
       "storage_slot", "storage_box", "storage_plate", "storage_well",
       "storage_date", "sample_status", "storage_note", "storage_label"
     )
-
+    
     sample_inventory <- dat %>%
       filter(!is.na(storage_unit) | !is.na(storage_box)) %>%
       select(all_of(sample_inventory_cols)) %>%
       distinct() # Ensure unique rows per sample storage record
-
+    
     output$sample_inventory <- renderDT({
       datatable(
         sample_inventory,
@@ -719,8 +759,8 @@ server <- function(input, output, session) {
       )
     })
     reportItems$tables$sample_inventory <- sample_inventory
-
-
+    
+    
     # Extraction Inventory Table
     # Lists storage information for every extraction within report_data
     extract_inventory_cols <- c(
@@ -728,12 +768,12 @@ server <- function(input, output, session) {
       "extract_rack", "extract_slot", "extract_box", "extract_plate",
       "extract_well", "extract_date", "extract_status", "extract_storage_note"
     )
-
+    
     extract_inventory <- dat %>%
       filter(!is.na(extract_unit) | !is.na(extract_box)) %>%
       select(all_of(extract_inventory_cols)) %>%
       distinct() # Ensure unique rows per extraction storage record
-
+    
     output$extract_inventory <- renderDT({
       datatable(
         extract_inventory,
@@ -743,7 +783,7 @@ server <- function(input, output, session) {
       )
     })
     reportItems$tables$extract_inventory <- extract_inventory
-
+    
     # Sample storage figures
     samples <- dat %>%
       filter(!is.na(storage_unit) | !is.na(storage_box)) %>%
@@ -751,7 +791,7 @@ server <- function(input, output, session) {
         sample_accession, project, storage_unit, storage_shelf,
         storage_rack, storage_slot, storage_box
       )
-
+    
     p_sample_hist <- make_storage_histogram(
       samples, "storage_unit", "project",
       "Storage Unit", "Number of Samples"
@@ -760,7 +800,7 @@ server <- function(input, output, session) {
       p_sample_hist
     })
     reportItems$plots$sample_hist <- p_sample_hist
-
+    
     p_sample_sankey <- make_storage_sankey(
       data = samples,
       level1 = "storage_unit", level2 = "storage_shelf",
@@ -770,8 +810,8 @@ server <- function(input, output, session) {
       p_sample_sankey
     })
     reportItems$plots$sample_sankey <- p_sample_sankey
-
-
+    
+    
     # Extraction storage figures
     extracts <- dat %>%
       filter(!is.na(extract_unit) | !is.na(extract_box)) %>%
@@ -779,7 +819,7 @@ server <- function(input, output, session) {
         extract_accession, project, extract_unit, extract_shelf,
         extract_rack, extract_slot, extract_box
       )
-
+    
     p_extract_hist <- make_storage_histogram(
       extracts, "extract_unit", "project",
       "Extraction Unit", "Number of Extractions"
@@ -788,7 +828,7 @@ server <- function(input, output, session) {
       p_extract_hist
     })
     reportItems$plots$extract_hist <- p_extract_hist
-
+    
     p_extract_sankey <- make_storage_sankey(
       data = extracts,
       level1 = "extract_unit", level2 = "extract_shelf",
@@ -798,18 +838,18 @@ server <- function(input, output, session) {
       p_extract_sankey
     })
     reportItems$plots$extract_sankey <- p_extract_sankey
-
+    
     # Notification
     showNotification("All storage plots and tables generated successfully", type = "message")
   })
-
-
+  
+  
   # Diversity page =========================================
   # Used to assess the taxonomic diversity of samples in report_data
-
+  
   # Reactive value to store diversity_data
   diversity_data <- reactiveVal(NULL)
-
+  
   # Check if report_data is present
   observeEvent(input$refresh_diversity, {
     if (exists("report_data", envir = .GlobalEnv)) {
@@ -819,11 +859,11 @@ server <- function(input, output, session) {
       showNotification("No data found. Please generate data first in the Filter page", type = "error")
     }
   })
-
+  
   observeEvent(input$generate_diversity_plot, {
     dat <- diversity_data()
     req(dat, input$x_tax_level, input$color_tax_level)
-
+    
     if (input$x_tax_level == input$color_tax_level) {
       showNotification(
         "Please select two different taxonomic levels to compare",
@@ -832,11 +872,11 @@ server <- function(input, output, session) {
       )
       return(NULL)
     }
-
+    
     # Generate outputs using helper functions
     diversity_summary <- generate_diversity_summary(dat, input$x_tax_level, input$color_tax_level)
     plt <- generate_diversity_histogram(dat, input$x_tax_level, input$color_tax_level)
-
+    
     # Render and store results
     output$diversity_summary_table <- renderDataTable({
       datatable(diversity_summary, options = list(pageLength = 10), rownames = FALSE)
@@ -844,13 +884,13 @@ server <- function(input, output, session) {
     output$diversity_plot <- renderPlotly({
       plt
     })
-
+    
     # Add to reportItems for export
     reportItems$tables$diversity_summary <- diversity_summary
     reportItems$plots$diversity_histogram <- plt
   })
-
-
+  
+  
   # Geography page =========================================
   # Used to map and assess the spatial distribution of samples in report_data
   
@@ -971,7 +1011,7 @@ server <- function(input, output, session) {
       )
     
   })
-
+  
   # Sample variation page =========================================
   # Reactive value to store sample variation data
   sample_variation_data <- reactiveVal(NULL)
@@ -1060,10 +1100,10 @@ server <- function(input, output, session) {
   # i.e. how many samples collected, stored, extracted, library prepared, and sequenced
   # Process plots show dated information per sample
   # i.e. shows how long for a sample to be collected, stored, extracted, library prepared, and sequenced
-
+  
   # Reactive value to store timneline data
   timeline_data <- reactiveVal(NULL)
-
+  
   # Refresh Button
   observeEvent(input$refresh_timeline, {
     if (exists("report_data", envir = .GlobalEnv)) {
@@ -1074,13 +1114,13 @@ server <- function(input, output, session) {
       showNotification("No report data found. Please generate report data on Filter page", type = "error")
     }
   })
-
+  
   # Generate Tables and Figures
   observeEvent(input$generate_timeline, {
     req(timeline_data())
-
+    
     showNotification("Generating timeline figures...", type = "message")
-
+    
     tryCatch(
       {
         # Generate timeline accumulation plot
@@ -1089,18 +1129,18 @@ server <- function(input, output, session) {
         output$timeline_accumulation_plot <- renderPlotly({
           timeline_accumulation_plot
         })
-
+        
         # Generate sample processing timeline plot
         process_data <- generate_timeline_process_data(timeline_data())
         timeline_process_plot <- generate_timeline_process_plot(process_data)
         output$timeline_process_plot <- renderPlotly({
           timeline_process_plot
         })
-
+        
         # Add plots to reportItems
         reportItems$plots$timeline_accumulation_plot <- timeline_accumulation_plot
         reportItems$plots$timeline_process_plot <- timeline_process_plot
-
+        
         showNotification("Timeline figures generated", type = "message")
       },
       error = function(e) {
@@ -1111,7 +1151,7 @@ server <- function(input, output, session) {
       }
     )
   })
-
+  
   
   # Report page =========================================
   # Used to export reports using report_data
@@ -1121,19 +1161,29 @@ server <- function(input, output, session) {
   # UI Builders
   output$select_tables_ui <- renderUI({
     table_names <- names(reportItems$tables)
+    
     if (length(table_names) == 0) {
       return(h6("No tables available yet"))
     }
     
-    # Identify the 'All sample data' table
-    all_sample_data_table <- "All sample data" 
+    # Tables that should not be selected by default
+    tables_not_selected <- c(
+      "All sample data",
+      "sample_type_summary",
+      "sex_summary",
+      "developmental_stage_summary",
+      "body_size_data"
+    )
     
-    # Get all table names EXCEPT 'All sample data'
-    default_selected <- setdiff(table_names, all_sample_data_table)
+    # Pre-select all other tables
+    default_selected <- setdiff(
+      table_names,
+      tables_not_selected
+    )
     
-    # Pre-select all tables except 'All sample data'
     checkboxGroupInput(
-      "selected_tables", "Tables:",
+      "selected_tables",
+      "Tables:",
       choices = table_names,
       selected = default_selected
     )
@@ -1141,11 +1191,14 @@ server <- function(input, output, session) {
   
   output$select_plots_ui <- renderUI({
     plot_names <- names(reportItems$plots)
+    
     if (length(plot_names) == 0) {
       return(h6("No plots available yet"))
     }
+    
     checkboxGroupInput(
-      "selected_plots", "Plots:",
+      "selected_plots",
+      "Plots:",
       choices = plot_names,
       selected = plot_names
     )
@@ -1267,7 +1320,7 @@ output: html_document
     
     content <- c(yaml_header,
                  glue("<strong>Date generated:</strong> {report_date}")
-                 )
+    )
     assigned_globals <- character(0)
     
     # Tables
@@ -1340,7 +1393,7 @@ output: html_document
       "<strong>This report was generated using Aurora</strong>.
       <br />Please cite: Zareie-Vaux F., Abernethy G.A. 2026. Aurora: a versatile, open-source laboratory information management system for biological samples using R Shiny. <i>Journal of Open Source Software</i>, XX, XX-XX. <a href='https://www.doi.org/'>DOI.XXX.XXXX</a>
       <br /><a href='https://github.com/fvaux/aurora'>Aurora on GitHub</a>"
-      )
+    )
     
     # Write temporary qmd file
     writeLines(content, qmd_file)
@@ -1370,6 +1423,29 @@ output: html_document
         },
         silent = TRUE
       )
+    })
+  })
+  
+  # Label exports: currently filtered samples, saved in Reports folder
+  observeEvent(input$report_sample_labels, {
+    req(filtered_df())
+    tryCatch({
+      ids <- unique(filtered_df()$sample_accession)
+      destination <- export_label_data("sample", reportpath, sample_ids = ids)
+      toastr_success(paste("Saved:", basename(destination)), position = "bottom-left")
+    }, error = function(e) {
+      toastr_error(paste("Label export failed:", conditionMessage(e)), position = "bottom-left")
+    })
+  })
+  
+  observeEvent(input$report_extract_labels, {
+    req(filtered_df())
+    tryCatch({
+      ids <- unique(filtered_df()$sample_accession)
+      destination <- export_label_data("extract", reportpath, sample_ids = ids)
+      toastr_success(paste("Saved:", basename(destination)), position = "bottom-left")
+    }, error = function(e) {
+      toastr_error(paste("Label export failed:", conditionMessage(e)), position = "bottom-left")
     })
   })
   
@@ -1453,6 +1529,6 @@ output: html_document
       }
     )
   })
-
+  
   # END ============================
 } # end of server

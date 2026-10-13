@@ -36,8 +36,5 @@ renv/staging/
 # Aurora automatic backups ====
 Autobackups/*
 
-# Aurora generated reports ====
-Reports/*
-
 # Aurora generated exports ====
 Export/*

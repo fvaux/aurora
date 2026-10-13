@@ -214,6 +214,20 @@ save_edits <- function(check_group, table_mapping, fpath) {
   }
   
   assign(tm, xtemp, envir = .GlobalEnv)
-  saveRDS(xtemp, file = paste0(fpath(), tm, ".rds"))
-  toastr_success("Saved to Disk", position = "bottom-left")
+  # saveRDS(xtemp, file = paste0(fpath(), tm, ".rds"))
+  
+  saved <- safesave(
+    data = xtemp,
+    filepath = fpath(),
+    file = tm
+  )
+  
+  if (isTRUE(saved)) {
+    toastr_success("Saved to Disk", position = "bottom-left")
+  } else {
+    toastr_warning(
+      "File was not saved. Another user may have modified it. Please restart Aurora to refresh the data.",
+      position = "bottom-left"
+    )
+  }
 }

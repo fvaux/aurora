@@ -40,7 +40,7 @@ generate_export_data <- function() {
       }
     ) %>%
     select(1, provenance_date, everything())
-
+  
   table_SampleStorage2 <- table_SampleStorage %>%
     mutate(
       storage_date = if ("storage_date" %in% names(.)) {
@@ -50,7 +50,7 @@ generate_export_data <- function() {
       }
     ) %>%
     select(1, storage_date, everything())
-
+  
   table_Extraction2 <- table_Extraction %>%
     mutate(
       extract_date = if ("extract_date" %in% names(.)) {
@@ -60,7 +60,7 @@ generate_export_data <- function() {
       }
     ) %>%
     select(1, extract_accession, extract_date, everything())
-
+  
   table_PCR2 <- table_PCR %>%
     mutate(
       pcr_date = if ("pcr_date" %in% names(.)) {
@@ -70,7 +70,7 @@ generate_export_data <- function() {
       }
     ) %>%
     select(1, pcr_accession, pcr_date, everything())
-
+  
   table_LibraryPreparation2 <- table_LibraryPreparation %>%
     mutate(
       library_date = if ("library_date" %in% names(.)) {
@@ -80,7 +80,7 @@ generate_export_data <- function() {
       }
     ) %>%
     select(1, library_accession, library_date, everything())
-
+  
   table_Sequencing2 <- table_Sequencing %>%
     mutate(
       sequencing_date = if ("sequencing_date" %in% names(.)) {
@@ -90,7 +90,7 @@ generate_export_data <- function() {
       }
     ) %>%
     select(1, sequencing_accession, sequencing_date, everything())
-
+  
   # Combine all tables
   export_data <- table_SampleTracking %>%
     left_join(table_SampleClassification, by = "sample_accession") %>%
@@ -107,7 +107,7 @@ generate_export_data <- function() {
     left_join(table_LibraryPreparation2, by = "sample_accession") %>%
     left_join(table_Sequencing2, by = "sample_accession") %>%
     left_join(table_Publication, by = "sample_accession")
-
+  
   return(export_data)
 }
 
@@ -130,17 +130,71 @@ generate_export_data <- function() {
 export_dataset <- function(df, prefix) {
   # Generate a timestamp: YYYYMMDD_HHMMSS (e.g., 20251016_100349)
   timestamp <- format(Sys.time(), "%Y%m%d_%H%M%S")
-
+  
   # CSV export (cleaned)
   cleaned_csv <- mungeProof(df)
   write_csv(cleaned_csv, file = paste0(exportpath, prefix, "_", timestamp, ".csv"))
-
-  # RDS export (formatted)
+  
+  # Timestamped export files are not part of ltisim_list.
+  # Use saveRDS rather than safesave for these new export files.
   formatted_rds <- formatDataTables(df)
   saveRDS(formatted_rds, file = paste0(exportpath, prefix, "_", timestamp, ".rds"))
+  
 }
 
 # Filter sequenced samples ============================
 filter_sequenced_samples <- function(df) {
   df %>% filter(!sequencing_accession == "_NA")
+}
+
+# Export label spreadsheets ====
+# Build labels directly from the relevant tables to avoid duplicate rows
+# introduced by joining unrelated one-to-many tables (PCR, sequencing, etc.).
+generate_label_data <- function(type = c("sample", "extract"), sample_ids = NULL) {
+  type <- match.arg(type)
+  
+  samples <- table_SampleTracking %>%
+    dplyr::select(sample_accession, project_code) %>%
+    dplyr::left_join(
+      table_SampleClassification %>%
+        dplyr::select(sample_accession, species_binomial),
+      by = "sample_accession"
+    )
+  
+  if (!is.null(sample_ids)) {
+    samples <- samples %>% dplyr::filter(sample_accession %in% sample_ids)
+  }
+  
+  if (type == "sample") {
+    provenance <- table_SampleProvenance %>%
+      dplyr::select(sample_accession, provenance_date)
+    
+    return(samples %>%
+             dplyr::left_join(provenance, by = "sample_accession") %>%
+             dplyr::select(sample_accession, provenance_date, project_code, species_binomial))
+  }
+  
+  table_Extraction %>%
+    dplyr::filter(
+      !is.na(extract_accession),
+      trimws(as.character(extract_accession)) != "",
+      !trimws(as.character(extract_accession)) %in% c("NA", "_NA")
+    ) %>%
+    dplyr::select(extract_accession, sample_accession, extract_date) %>%
+    dplyr::inner_join(samples, by = "sample_accession") %>%
+    dplyr::select(extract_accession, sample_accession, extract_date,
+                  project_code, species_binomial)
+}
+
+# Write label data as an Excel file in the selected output directory.
+export_label_data <- function(type = c("sample", "extract"),
+                              path, sample_ids = NULL) {
+  type <- match.arg(type)
+  if (!dir.exists(path)) dir.create(path, recursive = TRUE)
+  labels <- generate_label_data(type, sample_ids)
+  timestamp <- format(Sys.time(), "%Y%m%d_%H%M%S")
+  filename <- paste0(type, "_labels_", timestamp, ".xlsx")
+  destination <- file.path(path, filename)
+  writexl::write_xlsx(labels, path = destination)
+  destination
 }

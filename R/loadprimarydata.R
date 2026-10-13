@@ -54,33 +54,45 @@
 #'   path = "./aurora_data/"
 #' )
 loadprimarydata <- function(table_mapping, path) {
-  for (i in table_mapping) {
-    x <- readRDS(file = paste0(path, i, ".rds")) # Reads in each separate .rds Data Table file
-    x <- formatDataTables(x) # Transform data formatting
-    assign(i, x, envir = .GlobalEnv)
+  # Load each file once and record the modification time of that version.
+  # safesave() expects ltisim_list in .GlobalEnv, indexed by full file path.
+  timestamps <- list()
+  
+  for (i in unname(table_mapping)) {
+    f <- file.path(path, paste0(i, ".rds"))
+    if (!file.exists(f)) stop("Missing Aurora data file: ", f)
     
-    # Add species_binomial to table_SampleClassification immediately after loading
-    # species_binomial is genus + species with space (does not include subspecies etc.)
-    # species_binomial is NA if species is NA or empty
+    mtime_before <- file.info(f)$mtime
+    x <- readRDS(f)
+    mtime_after <- file.info(f)$mtime
+    if (is.na(mtime_before) || is.na(mtime_after) ||
+        !identical(as.numeric(mtime_before), as.numeric(mtime_after))) {
+      stop("Aurora data file changed while loading: ", f)
+    }
+    timestamps[[normalizePath(f, winslash = "/", mustWork = TRUE)]] <- mtime_after
+    
+    x <- formatDataTables(x)
     if (i == "table_SampleClassification") {
       x <- x %>%
-        mutate(
-          species_binomial = if_else(is.na(species) | species == "", NA_character_, paste(genus, species))
-        )
-      assign(i, x, envir = .GlobalEnv) # Re-assign data with the new column
+        mutate(species_binomial = if_else(
+          is.na(species) | species == "", NA_character_, paste(genus, species)
+        ))
     }
+    assign(i, x, envir = .GlobalEnv)
   }
   
-  # Convert separate year, month, day columns in four tables to single, combined date column
+  # Retain the original derived-date and column-ordering behaviour.
   updateDate()
-  
-  # Reorder columns based on default.cols (required as updateDate affects column sorting)
-  for (i in table_mapping) {
+  for (i in unname(table_mapping)) {
     table_name <- names(table_mapping)[table_mapping == i]
-    x <- get(i)
+    x <- get(i, envir = .GlobalEnv)
     if (table_name %in% names(default.cols)) {
       x <- x[, default.cols[[table_name]], drop = FALSE]
       assign(i, x, envir = .GlobalEnv)
     }
   }
+  
+  # Publish timestamps only after the entire load succeeds.
+  assign("ltisim_list", timestamps, envir = .GlobalEnv)
+  invisible(NULL)
 }

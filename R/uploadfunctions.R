@@ -74,8 +74,30 @@ upload_new_samples <- function(constants, table_mapping, fpath) {
           )
           return()
         } else {
-          assign("table_SampleTracking", ti, envir = .GlobalEnv)
-          saveRDS(table_SampleTracking, file = paste0(fpath(), "table_SampleTracking.rds"))
+          saved <- safesave(
+
+            data = ti,
+
+            filepath = fpath(),
+
+            file = i,
+
+            toastr = FALSE
+
+          )
+
+          if (!isTRUE(saved)) {
+
+            toastr_warning(paste("Upload stopped: could not save", i, "because the file changed on disk. Earlier tables may have been saved."),
+
+                           position = "bottom-left")
+
+            return(FALSE)
+
+          }
+
+          assign(i, ti, envir = .GlobalEnv)
+          
         }
       } else {
         # Append and deduplicate for other tables
@@ -83,14 +105,47 @@ upload_new_samples <- function(constants, table_mapping, fpath) {
         ti <- bind_rows(table_i, aa) %>%
           distinct()
 
+        saved <- safesave(
+
+
+          data = ti,
+
+
+          filepath = fpath(),
+
+
+          file = i,
+
+
+          toastr = FALSE
+
+
+        )
+
+
+        if (!isTRUE(saved)) {
+
+
+          toastr_warning(paste("Upload stopped: could not save", i, "because the file changed on disk. Earlier tables may have been saved."),
+
+
+                         position = "bottom-left")
+
+
+          return(FALSE)
+
+
+        }
+
+
         assign(i, ti, envir = .GlobalEnv)
-        saveRDS(ti, file = paste0(fpath(), i, ".rds"))
       }
     }
   }
 
   # Notify user ====
   toastr_success("Records Uploaded", position = "bottom-left")
+  return(TRUE)
 }
 
 
@@ -117,17 +172,61 @@ actionUpload <- function(dupload) {
           toastr_error("NOT UPLOADED -- Possibly duplicate sample accession", position = "bottom-left")
           return()
         } else {
-          assign("table_SampleTracking", ti, envir = .GlobalEnv)
-          saveRDS(table_SampleTracking, file = paste0(fpath, "table_SampleTracking.rds"))
+          saved <- safesave(
+
+            data = ti,
+
+            filepath = fpath(),
+
+            file = i,
+
+            toastr = FALSE
+
+          )
+
+          if (!isTRUE(saved)) {
+
+            toastr_warning(paste("Upload stopped: could not save", i, "because the file changed on disk. Earlier tables may have been saved."),
+
+                           position = "bottom-left")
+
+            return(FALSE)
+
+          }
+
+          assign(i, ti, envir = .GlobalEnv)
+          
         }
       } else {
         # for all tables except table_SampleTracking:
         # bind_rows not rows_upsert because we can have duplicate entries per sample_accession
         ti <- bind_rows(table_i, aa) %>%
           distinct()
+        saved <- safesave(
+
+          data = ti,
+
+          filepath = fpath(),
+
+          file = i,
+
+          toastr = FALSE
+
+        )
+
+        if (!isTRUE(saved)) {
+
+          toastr_warning(paste("Upload stopped: could not save", i, "because the file changed on disk. Earlier tables may have been saved."),
+
+                         position = "bottom-left")
+
+          return(FALSE)
+
+        }
+
         assign(i, ti, envir = .GlobalEnv)
-        saveRDS(ti, file = paste0(fpath(), i, ".rds"))
       }
     }
   }
+  return(TRUE)
 }
