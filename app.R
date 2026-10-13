@@ -1,5 +1,5 @@
 # Aurora, version 0.1
-# Date: 2026.10.13
+# Date: 2026.08.21
 
 # Developers: Grant Abernethy and Felix Zareie-Vaux
 # GitHub: https://github.com/fvaux/aurora
@@ -37,18 +37,9 @@ shinyApp(ui = ui, server = server) # Run this command to launch the Aurora app
 
 # If accepted: update publication details in this file and UI.
 
-## Example data ====
-# Update/add to Example Data to ensure all columns demonstrated (use AI)
-# Generate Example data report and Excel file
-
 ## Shortcut ====
-# Grant to make .bat Windows shortcut file
-# Using SY Aurora vessel photo from Wikipedia/Wikicommons?
-
-## Label tables ====
-# Make Report tab include two label_tables for samples and extractions (for filtered samples)
-# Using columns to match DYMO labels
-# Make Export table include buttons to export sample and extraction labels (for all samples)
+# Could to make .bat Windows shortcut file
+# Using free SY Aurora vessel photo from Wikimedia Commons?
 
 ## Check for possible bugs ====
 #  ⚠️ Need to check order of operations/how report_data formed. 
