@@ -30,11 +30,14 @@ To avoid repetitive data entry and editing, high-level taxonomic information (e.
 
 We encourage users familiar with `R` to customise Aurora. All of the `R` scripts are well-annotated and the Launch page answers frequently asked questions. Adding new columns or tables only requires a few changes that are flagged in annotations.
 
+
 ![Aurora_entity_relationship_diagram](www/AuroraEntityRelationships.png)
 ***An entity relationship diagram illustrating the ten tables within the Aurora database structure***
 
+
 ![Aurora_data_flow_diagram](www/AuroraDataFlow.png)
 ***An illustration showing how data flows in and out of Aurora for upload, editing, export and reporting***
+
 
 ## Installation
 1. Install [R](https://cran.r-project.org/) and [RStudio](https://posit.co/download/rstudio-desktop/).
