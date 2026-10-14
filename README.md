@@ -1,4 +1,5 @@
-# Summary
+# Aurora
+## Summary
 `Aurora` is a free, open-source laboratory information management system (LIMS) implemented as an `Shiny` web application using `R` and `RStudio`. Aurora simplifies the management of biological samples and their metadata throughout a laboratory workflow. Aurora is designed to accommodate a wide range of specimen types and it has features tailored for genetic research. Aurora can be used to find specimens, track storage capacity, assess processing times, and it can generate `html` reports with interactive tables, figures and maps to share with colleagues or clients. Aurora is friendly for non-programmers to use, as samples are uploaded via a `Microsoft Excel` spreadsheet, and the application has a simple graphical user interface (GUI) with Excel-like functionality for editing. Aurora automatically checks data formatting and creates regular database back-ups. Users familiar with `R` can readily customise Aurora as it uses a small number of well-annotated `R` scripts and it only relies on a dozen or so common `R` packages. Aurora is needed, as most LIMS are subscription-based, proprietary software that are challenging to customise and existing programs are often unwieldy for the diverse sample types and workflows found in most biological research laboratories.
 
 ## Functionality and features  
@@ -24,8 +25,7 @@ To avoid repetitive data entry and editing, high-level taxonomic information (e.
 
 We encourage users familiar with `R` to customise Aurora. All of the `R` scripts are well-annotated and the Launch page answers frequently asked questions. Adding new columns or tables only requires a few changes that are flagged in annotations.
 
-
-# Installation
+## Installation
 1. Install [R](https://cran.r-project.org/) and [RStudio](https://posit.co/download/rstudio-desktop/).
 
 2. Download this repository from GitHub (**Code → Download ZIP**), or clone it using the following command in R (requires Git to be installed):
@@ -40,7 +40,7 @@ We encourage users familiar with `R` to customise Aurora. All of the `R` scripts
 
 **Optional (Windows):** Users can create a desktop shortcut to launch Aurora by following the instructions in [`install_desktop_icons.md`](install_desktop_icons.md), using a customised `.bat` file.
 
-# Launch
+## Launch
 
 1. Open the Aurora R project (`Aurora.Rproj`) in RStudio.
 2. Open `app.R`.
@@ -48,8 +48,13 @@ We encourage users familiar with `R` to customise Aurora. All of the `R` scripts
 
 **Alternative (Windows):** Users who have configured a desktop shortcut using [`install_desktop_icons.md`](install_desktop_icons.md) can launch Aurora directly from their desktop.
 
-# Contributors
+## Citation and contributors
 Aurora was developed by Grant Abernethy and Felix Zareie-Vaux.
 
-# AI usage disclosure
+**Please cite:**
+Zareie-Vaux, F., & Abernethy, G. A. (2026). Aurora: a free, open-source laboratory information management system for biological samples using R Shiny. *Journal of Open Source Software*, XX, XX–XX. [DOI](https://www.doi.org/).
+
+**GitHub repository:** [https://github.com/fvaux/aurora](https://github.com/fvaux/aurora)
+
+## AI usage disclosure
 Generative artificial intelligence chatbots, Google Gemini 3 Flash and OpenAI ChatGPT-5.3, assisted with R code generation, editing and annotation. All authors have reviewed, edited and validated these AI-assisted outputs and made the core design decisions.
