@@ -5,12 +5,15 @@
 `Aurora` is a free, open-source laboratory information management system (LIMS) implemented as an `Shiny` web application using `R` and `RStudio`. Aurora simplifies the management of biological samples and their metadata throughout a laboratory workflow. Aurora is designed to accommodate a wide range of specimen types and it has features tailored for genetic research. Aurora can be used to find specimens, track storage capacity, assess processing times, and it can generate `html` reports with interactive tables, figures and maps to share with colleagues or clients. Aurora is friendly for non-programmers to use, as samples are uploaded via a `Microsoft Excel` spreadsheet, and the application has a simple graphical user interface (GUI) with Excel-like functionality for editing. Aurora automatically checks data formatting and creates regular database back-ups. Users familiar with `R` can readily customise Aurora as it uses a small number of well-annotated `R` scripts and it only relies on a dozen or so common `R` packages. Aurora is needed, as most LIMS are subscription-based, proprietary software that are challenging to customise and existing programs are often unwieldy for the diverse sample types and workflows found in most biological research laboratories.
 
 ![Aurora edit page](www/edit-page.png)
-A screenshot of the Edit page in Aurora
+***A screenshot of the Edit page in Aurora***
 
 ## Functionality and features  
 `Aurora` is a free, open-source LIMS, which is a web application implemented using `R`, `Shiny` and `RStudio`. 
 
 Aurora operates as a relational database, where data for each sample is linked to a unique sample accession. Beyond that mandatory identifier field, there are numerous optional fields to record information. These fields are organised and managed across 10 tables. The first five tables record direct sample information: tracking, classification, detail, provenance, and storage. Four tables focus on DNA and RNA research from samples: extraction, PCR, library preparation, and sequencing. A short, final table records information for publications associated with samples, which is mainly relevant for taxonomic research involving type specimens. 
+
+![Aurora_entity_relationship_diagram](www/AuroraEntityRelationships.pnge.png)
+***An entity relationship diagram illustrating the ten tables within the Aurora database structure***
 
 Typically, users begin by entering data into fields using the ‘aurora_queue.xlsx’ `Excel` file. Aside from the sample accession, all fields are optional and users can arrange (and delete) columns in the `Excel` spreadsheet as they please. The `Excel` file has multiple tabs, so that users can progress samples along a laboratory workflow until they are ready for upload (e.g. sample intake > DNA extraction > PCR > sequencing > pre-upload > upload). That approach is particularly useful when separate personnel hand-over different stages of a laboratory workflow. The `Excel` file includes a data glossary and prompts for most fields, as well as a tab with ~500 rows of example data. When samples are ready to be imported into Aurora, users copy rows to the Upload tab, and we recommend appending those rows to the Manual backup tab as well. 
 
