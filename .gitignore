@@ -38,3 +38,7 @@ Autobackups/*
 
 # Aurora generated exports ====
 Export/*
+
+# Aurora generated reports ====
+Reports/*
+!Reports/Example_Aurora_Report.html
