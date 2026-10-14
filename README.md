@@ -12,9 +12,6 @@
 
 Aurora operates as a relational database, where data for each sample is linked to a unique sample accession. Beyond that mandatory identifier field, there are numerous optional fields to record information. These fields are organised and managed across 10 tables. The first five tables record direct sample information: tracking, classification, detail, provenance, and storage. Four tables focus on DNA and RNA research from samples: extraction, PCR, library preparation, and sequencing. A short, final table records information for publications associated with samples, which is mainly relevant for taxonomic research involving type specimens. 
 
-![Aurora_entity_relationship_diagram](www/AuroraEntityRelationships.png)
-***An entity relationship diagram illustrating the ten tables within the Aurora database structure***
-
 Typically, users begin by entering data into fields using the ‘aurora_queue.xlsx’ `Excel` file. Aside from the sample accession, all fields are optional and users can arrange (and delete) columns in the `Excel` spreadsheet as they please. The `Excel` file has multiple tabs, so that users can progress samples along a laboratory workflow until they are ready for upload (e.g. sample intake > DNA extraction > PCR > sequencing > pre-upload > upload). That approach is particularly useful when separate personnel hand-over different stages of a laboratory workflow. The `Excel` file includes a data glossary and prompts for most fields, as well as a tab with ~500 rows of example data. When samples are ready to be imported into Aurora, users copy rows to the Upload tab, and we recommend appending those rows to the Manual backup tab as well. 
 
 To launch Aurora, users must have `R`, `Shiny` and `RStudio` installed with the required `R` packages (that can be saved within a user’s `R` library). Aurora uses around a dozen, popular packages. Under `RStudio` settings, Aurora can be opened within an internal window or an external web browser. Aurora needs to be saved in a shared file location to enable multiple users to access the same database files. Local settings (e.g. Excel and OneDrive) may be required to enable simultaneous editing of the aurora_queue.xlsx file. Once installed, users on Windows can launch `Aurora` from a desktop shortcut by following instructions in `install_desktop_icons.md` using a customised a `.bat` file. 
@@ -32,6 +29,12 @@ The entire database can be exported in RDS and .csv formats on the Export page. 
 To avoid repetitive data entry and editing, high-level taxonomic information (e.g. kingdom, phylum) is managed in another `Excel` file, 'taxonomy_source.xlsx'. Users can manually edit that reference table to update taxonomic information for samples. If desired, we have provided a utility `R` code to retrieve information from the Global Biodiversity Information Facility (GBIF).
 
 We encourage users familiar with `R` to customise Aurora. All of the `R` scripts are well-annotated and the Launch page answers frequently asked questions. Adding new columns or tables only requires a few changes that are flagged in annotations.
+
+![Aurora_entity_relationship_diagram](www/AuroraEntityRelationships.png)
+***An entity relationship diagram illustrating the ten tables within the Aurora database structure***
+
+![Aurora_data_flow_diagram](www/AuroraDataFlow.png)
+***An illustration showing how data flows in and out of Aurora for upload, editing, export and reporting***
 
 ## Installation
 1. Install [R](https://cran.r-project.org/) and [RStudio](https://posit.co/download/rstudio-desktop/).
