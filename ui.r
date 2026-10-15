@@ -112,7 +112,7 @@ ui <- fluidPage(
             p("Developed by Grant A. Abernethy and Felix Zareie-Vaux"),
             strong("Please cite:"),
             br(),
-            tags$a(href = "https://www.doi.org/", "Zareie-Vaux F., Abernethy G.A. 2026. Aurora: a versatile, open-source laboratory information management system for biological samples using R Shiny. Journal of Open Source Software, XX, XX-XX. DOI.XXX.XXXX"),
+            tags$a(href = "https://www.doi.org/", "Zareie-Vaux F., Abernethy G.A. 2026. Aurora: a free, open-source laboratory information management system for biological samples using R Shiny. Journal of Open Source Software, XX, XX-XX. DOI.XXX.XXXX"),
             br(),
             strong("GitHub repository:"),
             br(),

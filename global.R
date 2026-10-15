@@ -320,24 +320,59 @@ t <- tibble_row(
 
 # table_tracker records this information
 # ⚠️ table_tracker does not self-deleted, users must manually clear or delete to remove existing data
-table_Tracker <- readRDS(paste0(filepath, "table_Tracker.rds")) %>% bind_rows(t)
-saveRDS(table_Tracker, paste0(filepath, "table_Tracker.rds"))
-# safesave(
-#   data = table_Tracker,
-#   filepath = filepath,
-#   file = "table_Tracker",
-#   toastr = FALSE    # because toaster cant work in global since the reactive shiny app hasn’t started yet) 
-# )
-
-
+tracker_file <- file.path(filepath, "table_Tracker.rds")
+if (file.exists(tracker_file)) {
+  table_Tracker <- readRDS(tracker_file) %>% bind_rows(t)
+} else {
+  # A fresh installation may not have a tracker file yet.
+  table_Tracker <- t
+}
+saveRDS(table_Tracker, tracker_file)
+# Tracker is an auxiliary file and is not managed by safesave().
 
 # Autobackup ============================
-last.date <- readRDS(paste0(filepath, "LastSaveDate.rds"))
-today <- today()
-# Backs up key files periodically
-# Saves all files saved to one file
-# To restore, open the backup in RStudio, then save the individual files as needed.
-if (today - last.date > 2) {
+# Empty directories are not tracked by Git, so create this on first launch.
+backup_dir <- "./Autobackups"
+if (!dir.exists(backup_dir)) {
+  if (!dir.create(backup_dir, recursive = TRUE, showWarnings = FALSE) &&
+      !dir.exists(backup_dir)) {
+    stop("Could not create Aurora backup directory: ", backup_dir)
+  }
+}
+
+backup_today <- lubridate::today()
+last_save_file <- file.path(filepath, "LastSaveDate.rds")
+
+# LastSaveDate.rds may be absent on a fresh installation. If it is absent
+# or invalid, use an existing main backup's modification date if possible;
+# otherwise create a first backup now.
+last.date <- as.Date(NA)
+if (file.exists(last_save_file)) {
+  last.date <- tryCatch(
+    as.Date(readRDS(last_save_file)),
+    error = function(e) as.Date(NA)
+  )
+  if (length(last.date) != 1L || is.na(last.date)) {
+    last.date <- as.Date(NA)
+  }
+}
+
+backup_files <- list.files(
+  backup_dir, pattern = "^Autobackup .*\\.RData$", full.names = TRUE
+)
+if (is.na(last.date) && length(backup_files) > 0L) {
+  backup_mtimes <- file.info(backup_files)$mtime
+  if (any(!is.na(backup_mtimes))) {
+    last.date <- as.Date(max(backup_mtimes, na.rm = TRUE))
+  }
+}
+
+# Keep the previous date for both the 2-day and 7-day checks.
+days_since_backup <- if (is.na(last.date)) Inf else as.numeric(backup_today - last.date)
+
+# Save all principal data tables in a single backup file.
+if (days_since_backup > 2) {
+  backup_file <- file.path(backup_dir, paste0("Autobackup ", backup_today, ".RData"))
   save(
     table_SampleTracking,
     table_SampleClassification,
@@ -350,26 +385,37 @@ if (today - last.date > 2) {
     table_Sequencing,
     table_Publication,
     table_Tracker,
-    file = (paste0("./Autobackups/Autobackup ", today, ".RData"))
+    file = backup_file
   )
-  saveRDS(today, file = (paste0(filepath, "LastSaveDate.rds")))
-  # safesave(
-  #   data = today,
-  #   filepath = filepath,
-  #   file = "LastSaveDate",
-  #   toastr = FALSE    # because toaster cant work in global since the reactive shiny app hasn’t started yet) 
-  # )
-  
+  # Only update the date once the backup has been successfully written.
+  saveRDS(backup_today, file = last_save_file)
 }
 
-# This periodically backs up samples/entries abandoned via the Edit page
-if (today - last.date > 7) {
-  file.copy(from = "./RDataFiles/abandoned.csv", to = (paste0("./Autobackups/abandoned ", today, ".csv")))
+# Periodically back up abandoned entries, if that file exists.
+# It may be absent in a fresh installation.
+abandoned_file <- file.path(filepath, "abandoned.csv")
+if (days_since_backup > 7 && file.exists(abandoned_file)) {
+  file.copy(
+    from = abandoned_file,
+    to = file.path(backup_dir, paste0("abandoned ", backup_today, ".csv")),
+    overwrite = TRUE
+  )
 }
 
-# Backup the aurora_queue.xlsx and taxonomy_queue.xlsx files on launch with daily time stamps
-x <- file.copy(from = "./Upload/aurora_queue.xlsx", to = (paste0("./Autobackups/aurora_queue ", today(), ".xlsx")), overwrite = TRUE)
-y <- file.copy(from = "./Taxonomy/taxonomy_source.xlsx", to = (paste0("./Autobackups/taxonomy_source ", today(), ".xlsx")), overwrite = TRUE)
+# Copy Excel reference files on launch (once per day).
+# Missing optional files are skipped without preventing Aurora from launching.
+queue_file <- "./Upload/aurora_queue.xlsx"
+taxonomy_file <- "./Taxonomy/taxonomy_source.xlsx"
+x <- if (file.exists(queue_file)) {
+  file.copy(queue_file,
+            file.path(backup_dir, paste0("aurora_queue ", backup_today, ".xlsx")),
+            overwrite = TRUE)
+} else FALSE
+y <- if (file.exists(taxonomy_file)) {
+  file.copy(taxonomy_file,
+            file.path(backup_dir, paste0("taxonomy_source ", backup_today, ".xlsx")),
+            overwrite = TRUE)
+} else FALSE
 
 # Tidy up memory ============================
 # Removing temporary objects and tables from app's memory
@@ -379,7 +425,15 @@ rm(x)
 rm(y)
 rm(i)
 rm(last.date)
-rm(today)
+rm(days_since_backup)
+rm(last_save_file)
+rm(tracker_file)
+rm(abandoned_file)
+rm(queue_file)
+rm(taxonomy_file)
+rm(backup_today)
+rm(backup_dir)
+rm(backup_files)
 rm(template.cols)
 rm(page.cols)
 rm(sp_needs)

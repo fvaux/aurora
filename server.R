@@ -1391,7 +1391,7 @@ output: html_document
     content <- c(
       content,
       "<strong>This report was generated using Aurora</strong>.
-      <br />Please cite: Zareie-Vaux F., Abernethy G.A. 2026. Aurora: a versatile, open-source laboratory information management system for biological samples using R Shiny. <i>Journal of Open Source Software</i>, XX, XX-XX. <a href='https://www.doi.org/'>DOI.XXX.XXXX</a>
+      <br />Please cite: Zareie-Vaux F., Abernethy G.A. 2026. Aurora: a free, open-source laboratory information management system for biological samples using R Shiny. <i>Journal of Open Source Software</i>, XX, XX-XX. <a href='https://www.doi.org/'>DOI.XXX.XXXX</a>
       <br /><a href='https://github.com/fvaux/aurora'>Aurora on GitHub</a>"
     )
     
