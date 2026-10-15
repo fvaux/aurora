@@ -6,6 +6,7 @@
 - [Functionality and features](#functionality-and-features)
 - [Installation](#installation)
 - [Launch](#launch)
+- [Example data and report](#example-data-and-report)
 - [Citation and contributors](#citation-and-contributors)
 - [AI usage disclosure](#ai-usage-disclosure)
 
@@ -13,12 +14,8 @@
 `Aurora` is a free, open-source laboratory information management system (LIMS) implemented as an `Shiny` web application using `R` and `RStudio`. Aurora simplifies the management of biological samples and their metadata throughout a laboratory workflow. Aurora is designed to accommodate a wide range of specimen types and it has features tailored for genetic research. Aurora can be used to find specimens, track storage capacity, assess processing times, and it can generate `html` reports with interactive tables, figures and maps to share with colleagues or clients. Aurora is friendly for non-programmers to use, as samples are uploaded via a `Microsoft Excel` spreadsheet, and the application has a simple graphical user interface (GUI) with Excel-like functionality for editing. Aurora automatically checks data formatting and creates regular database back-ups. Users familiar with `R` can readily customise Aurora as it uses a small number of well-annotated `R` scripts and it only relies on a dozen or so common `R` packages. Aurora is needed, as most LIMS are subscription-based, proprietary software that are challenging to customise and existing programs are often unwieldy for the diverse sample types and workflows found in most biological research laboratories.
 
 <p align="center">
-  <a href="www/edit-page.png">
   <img src="www/edit-page.png" alt="Aurora edit page" width="49%">
-  </a>
-  <a href="www/report-page.png">
   <img src="www/report-page.png" alt="Aurora report page" width="49%">
-  </a>
   <em>Screenshots of the Edit and Report pages in Aurora</em>
 </p>
 
@@ -44,17 +41,13 @@ To avoid repetitive data entry and editing, high-level taxonomic information (e.
 We encourage users familiar with `R` to customise Aurora. All of the `R` scripts are well-annotated and the Launch page answers frequently asked questions. Adding new columns or tables only requires a few changes that are flagged in annotations.
 
 <p align="center">
-  <a href="www/AuroraEntityRelationships.png">
   <img src="www/AuroraEntityRelationships.png" alt="Aurora entity relationship diagram" width="60%">
-  </a>
   <br>
   <em>An entity relationship diagram illustrating the ten tables within the Aurora database structure</em>
 </p>
 
 <p align="center">
-  <a href="www//AuroraDataFlow.png">
   <img src="www/AuroraDataFlow.png" alt="Aurora data flow diagram" width="60%">
-  </a>
   <br>
   <em>An illustration showing how data flows in and out of Aurora for upload, editing, export and reporting</em>
 </p>
@@ -75,12 +68,16 @@ We encourage users familiar with `R` to customise Aurora. All of the `R` scripts
 **Optional (Windows):** Users can create a desktop shortcut to launch Aurora by following the instructions in [`install_desktop_icons.md`](install_desktop_icons.md), using a customised `.bat` file.
 
 ## Launch
-
 1. Open the Aurora R project (`Aurora.Rproj`) in RStudio.
 2. Open `app.R`.
 3. Click **Run App**. To launch Aurora in an external web browser, click the dropdown arrow beside **Run App** and select **Run External**.
 
 **Alternative (Windows):** Users who have configured a desktop shortcut using [`install_desktop_icons.md`](install_desktop_icons.md) can launch Aurora directly from their desktop.
+
+## Example data and report
+Users can switch to example data on the Launch to explore features. The example data is also available as a tab in the [aurora_queue.xlsx](Upload/aurora_queue.xlsx) file.
+
+An example report is also [available in the repository](Reports/Example_Aurora_Report.html).
 
 ## Citation and contributors
 Aurora was developed by Grant Abernethy and Felix Zareie-Vaux.
