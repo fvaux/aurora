@@ -69,7 +69,9 @@ We encourage users familiar with `R` to customise Aurora. All of the `.R` script
 
 ## Launch
 1. Open the Aurora R project (`Aurora.Rproj`) in RStudio.
+   
 2. Open `app.R`.
+   
 3. Click **Run App**. To launch Aurora in an external web browser, click the dropdown arrow beside **Run App** and select **Run External**.
 
 **Alternative (Windows):** Users who have configured a desktop shortcut using [`install_desktop_icons.md`](install_desktop_icons.md) can launch Aurora directly from their desktop.
