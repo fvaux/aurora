@@ -34,11 +34,11 @@ Users can edit data in Aurora using the Edit page. That page includes functions 
 
 Users can explore the database and search for samples or groups using the Search page. The Dashboard provides tables and interactive figures that track database size and sample accumulation over time, which can be used to assess database integrity (e.g. checking whether the correct number of samples have been added after an upload). A toggle on the Launch page allows users to switch to the example dataset.
 
-The entire database can be exported in RDS and .csv formats on the Export page. Aurora can be used to generate lists and reports for any set of samples. On the Filter page, users select samples and the subsequent Storage, Diversity, Geography, and Timeline provide interactive tables and figures for those samples. The Report page enables users to export those tables and figures within an interactive `html` file, and tables can also be exported as `Excel` files. These reporting features are designed for practical laboratory management, such as printing lists of freezer contents during an audit or defrost, sharing sequencing progress for a particular project, or mapping the location of samples belonging to a particular genus.
+The entire database can be exported in `.RDS` and `.csv` formats on the Export page. Aurora can be used to generate lists and reports for any set of samples. On the Filter page, users select samples and the subsequent Storage, Diversity, Geography, and Timeline provide interactive tables and figures for those samples. The Report page enables users to export those tables and figures within an interactive `html` file, and tables can also be exported as `Excel` files. These reporting features are designed for practical laboratory management, such as printing lists of freezer contents during an audit or defrost, sharing sequencing progress for a particular project, or mapping the location of samples belonging to a particular genus.
 
 To avoid repetitive data entry and editing, high-level taxonomic information (e.g. kingdom, phylum) is managed in another `Excel` file, [taxonomy_source.xlsx](Taxonomy/taxonomy_source.xlsx). Users can manually edit that reference table to update taxonomic information for samples. If desired, we have provided a utility `R` code to retrieve information from the Global Biodiversity Information Facility (GBIF).
 
-We encourage users familiar with `R` to customise Aurora. All of the `R` scripts are well-annotated and the Launch page answers frequently asked questions. Adding new columns or tables only requires a few changes that are flagged in annotations.
+We encourage users familiar with `R` to customise Aurora. All of the `R` scripts are well-annotated and the Launch page answers frequently asked questions. Adding new columns or tables only requires a few changes that are flagged in annotations. The main files to customise are [`app.R`](app.R), [`server.R`](server.R), and [`ui.R`](ui.R). Most functions are saved as separate files in the [R folder](R/).
 
 <p align="center">
   <img src="www/AuroraEntityRelationships.png" alt="Aurora entity relationship diagram" width="60%">
@@ -63,7 +63,7 @@ We encourage users familiar with `R` to customise Aurora. All of the `R` scripts
 
    For multi-user access, save the Aurora folder in a shared file location.
 
-4. Open the Aurora R project (`Aurora.Rproj`) in RStudio. Open [`global.R`](global.R) and install the required R packages listed at the top of the file.
+3. Open the Aurora R project (`Aurora.Rproj`) in RStudio. Open [`global.R`](global.R) and install the required R packages listed at the top of the file.
 
 **Optional (Windows):** Users can create a desktop shortcut to launch Aurora by following the instructions in [`install_desktop_icons.md`](install_desktop_icons.md), using a customised `.bat` file.
 
