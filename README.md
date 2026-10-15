@@ -1,25 +1,35 @@
 # Aurora
 ***A free, open-source laboratory information management system for biological samples using R Shiny***
 
+## Contents
+- [Summary](#summary)
+- [Functionality and features](#functionality-and-features)
+- [Installation](#installation)
+- [Launch](#launch)
+- [Citation and contributors](#citation-and-contributors)
+- [AI usage disclosure](#ai-usage-disclosure)
+
 ## Summary
 `Aurora` is a free, open-source laboratory information management system (LIMS) implemented as an `Shiny` web application using `R` and `RStudio`. Aurora simplifies the management of biological samples and their metadata throughout a laboratory workflow. Aurora is designed to accommodate a wide range of specimen types and it has features tailored for genetic research. Aurora can be used to find specimens, track storage capacity, assess processing times, and it can generate `html` reports with interactive tables, figures and maps to share with colleagues or clients. Aurora is friendly for non-programmers to use, as samples are uploaded via a `Microsoft Excel` spreadsheet, and the application has a simple graphical user interface (GUI) with Excel-like functionality for editing. Aurora automatically checks data formatting and creates regular database back-ups. Users familiar with `R` can readily customise Aurora as it uses a small number of well-annotated `R` scripts and it only relies on a dozen or so common `R` packages. Aurora is needed, as most LIMS are subscription-based, proprietary software that are challenging to customise and existing programs are often unwieldy for the diverse sample types and workflows found in most biological research laboratories.
 
 <p align="center">
+  <a href="www/edit-page.png">
   <img src="www/edit-page.png" alt="Aurora edit page" width="49%">
+  </a>
+  <a href="www/report-page.png">
   <img src="www/report-page.png" alt="Aurora report page" width="49%">
+  </a>
   <em>Screenshots of the Edit and Report pages in Aurora</em>
 </p>
 
-## Functionality and features  
-`Aurora` is a free, open-source LIMS, which is a web application implemented using `R`, `Shiny` and `RStudio`. 
-
+## Functionality and features   
 Aurora operates as a relational database, where data for each sample is linked to a unique sample accession. Beyond that mandatory identifier field, there are numerous optional fields to record information. These fields are organised and managed across 10 tables. The first five tables record direct sample information: tracking, classification, detail, provenance, and storage. Four tables focus on DNA and RNA research from samples: extraction, PCR, library preparation, and sequencing. A short, final table records information for publications associated with samples, which is mainly relevant for taxonomic research involving type specimens. 
 
-Typically, users begin by entering data into fields using the ‘aurora_queue.xlsx’ `Excel` file. Aside from the sample accession, all fields are optional and users can arrange (and delete) columns in the `Excel` spreadsheet as they please. The `Excel` file has multiple tabs, so that users can progress samples along a laboratory workflow until they are ready for upload (e.g. sample intake > DNA extraction > PCR > sequencing > pre-upload > upload). That approach is particularly useful when separate personnel hand-over different stages of a laboratory workflow. The `Excel` file includes a data glossary and prompts for most fields, as well as a tab with ~500 rows of example data. When samples are ready to be imported into Aurora, users copy rows to the Upload tab, and we recommend appending those rows to the Manual backup tab as well. 
+Typically, users begin by entering data into fields using the [aurora_queue.xlsx](Upload/aurora_queue.xlsx) `Excel` file. Aside from the sample accession, all fields are optional and users can arrange (and delete) columns in the `Excel` spreadsheet as they please. The `Excel` file has multiple tabs, so that users can progress samples along a laboratory workflow until they are ready for upload (e.g. sample intake > DNA extraction > PCR > sequencing > pre-upload > upload). That approach is particularly useful when separate personnel hand-over different stages of a laboratory workflow. The `Excel` file includes a data glossary and prompts for most fields, as well as a tab with ~500 rows of example data. When samples are ready to be imported into Aurora, users copy rows to the Upload tab, and we recommend appending those rows to the Manual backup tab as well. 
 
-To launch Aurora, users must have `R`, `Shiny` and `RStudio` installed with the required `R` packages (that can be saved within a user’s `R` library). Aurora uses around a dozen, popular packages. Under `RStudio` settings, Aurora can be opened within an internal window or an external web browser. Aurora needs to be saved in a shared file location to enable multiple users to access the same database files. Local settings (e.g. Excel and OneDrive) may be required to enable simultaneous editing of the aurora_queue.xlsx file. Once installed, users on Windows can launch `Aurora` from a desktop shortcut by following instructions in [`install_desktop_icons.md`](install_desktop_icons.md) using a customised a `.bat` file. 
+To launch Aurora, users must have `R`, `Shiny` and `RStudio` installed with the required `R` packages (that can be saved within a user’s `R` library). Aurora uses around a dozen, popular packages. Under `RStudio` settings, Aurora can be opened within an internal window or an external web browser. Aurora needs to be saved in a shared file location to enable multiple users to access the same database files. Local settings (e.g. Excel and OneDrive) may be required to enable simultaneous editing of the [aurora_queue.xlsx](Upload/aurora_queue.xlsx) file. Once installed, users on Windows can launch `Aurora` from a desktop shortcut by following instructions in [`install_desktop_icons.md`](install_desktop_icons.md) using a customised a `.bat` file. 
 
-Once Aurora has been launched from `RStudio`, users import samples from aurora_queue.xlsx using the Upload page. Aurora automatically creates back-ups of the database and the `Excel` file, and it checks formatting and provides warnings if there are any issues. Alternatively, samples can be added manually using buttons and Excel-like functionality on the Edit page.
+Once Aurora has been launched from `RStudio`, users import samples from [aurora_queue.xlsx](Upload/aurora_queue.xlsx) using the Upload page. Aurora automatically creates back-ups of the database and the `Excel` file, and it checks formatting and provides warnings if there are any issues. Alternatively, samples can be added manually using buttons and Excel-like functionality on the Edit page.
 
 All data is saved locally within the Aurora application’s folders, and Aurora does not connect with the internet or any external databases. Permanent RDS files store all data as characters, and when launched, Aurora loads data into memory and transforms certain fields into appropriate formats (e.g. numeric). 
 
@@ -29,18 +39,22 @@ Users can explore the database and search for samples or groups using the Search
 
 The entire database can be exported in RDS and .csv formats on the Export page. Aurora can be used to generate lists and reports for any set of samples. On the Filter page, users select samples and the subsequent Storage, Diversity, Geography, and Timeline provide interactive tables and figures for those samples. The Report page enables users to export those tables and figures within an interactive `html` file, and tables can also be exported as `Excel` files. These reporting features are designed for practical laboratory management, such as printing lists of freezer contents during an audit or defrost, sharing sequencing progress for a particular project, or mapping the location of samples belonging to a particular genus.
 
-To avoid repetitive data entry and editing, high-level taxonomic information (e.g. kingdom, phylum) is managed in another `Excel` file, 'taxonomy_source.xlsx'. Users can manually edit that reference table to update taxonomic information for samples. If desired, we have provided a utility `R` code to retrieve information from the Global Biodiversity Information Facility (GBIF).
+To avoid repetitive data entry and editing, high-level taxonomic information (e.g. kingdom, phylum) is managed in another `Excel` file, [taxonomy_source.xlsx](Taxonomy/taxonomy_source.xlsx). Users can manually edit that reference table to update taxonomic information for samples. If desired, we have provided a utility `R` code to retrieve information from the Global Biodiversity Information Facility (GBIF).
 
 We encourage users familiar with `R` to customise Aurora. All of the `R` scripts are well-annotated and the Launch page answers frequently asked questions. Adding new columns or tables only requires a few changes that are flagged in annotations.
 
 <p align="center">
-  <img src="www/AuroraEntityRelationships.png" alt="Aurora entity relationship diagram" width="800">
+  <a href="www/AuroraEntityRelationships.png">
+  <img src="www/AuroraEntityRelationships.png" alt="Aurora entity relationship diagram" width="60%">
+  </a>
   <br>
   <em>An entity relationship diagram illustrating the ten tables within the Aurora database structure</em>
 </p>
 
 <p align="center">
-  <img src="www/AuroraDataFlow.png" alt="Aurora data flow diagram" width="800">
+  <a href="www//AuroraDataFlow.png">
+  <img src="www/AuroraDataFlow.png" alt="Aurora data flow diagram" width="60%">
+  </a>
   <br>
   <em>An illustration showing how data flows in and out of Aurora for upload, editing, export and reporting</em>
 </p>
@@ -56,7 +70,7 @@ We encourage users familiar with `R` to customise Aurora. All of the `R` scripts
 
    For multi-user access, save the Aurora folder in a shared file location.
 
-4. Open the Aurora R project (`Aurora.Rproj`) in RStudio. Open `global.R` and install the required R packages listed at the top of the file.
+4. Open the Aurora R project (`Aurora.Rproj`) in RStudio. Open [`global.R`](global.R) and install the required R packages listed at the top of the file.
 
 **Optional (Windows):** Users can create a desktop shortcut to launch Aurora by following the instructions in [`install_desktop_icons.md`](install_desktop_icons.md), using a customised `.bat` file.
 
