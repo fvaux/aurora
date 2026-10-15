@@ -38,7 +38,7 @@ The entire database can be exported in `.RDS` and `.csv` formats on the Export p
 
 To avoid repetitive data entry and editing, high-level taxonomic information (e.g. kingdom, phylum) is managed in another `Excel` file, [taxonomy_source.xlsx](Taxonomy/taxonomy_source.xlsx). Users can manually edit that reference table to update taxonomic information for samples. If desired, we have provided a utility `R` code to retrieve information from the Global Biodiversity Information Facility (GBIF).
 
-We encourage users familiar with `R` to customise Aurora. All of the `R` scripts are well-annotated and the Launch page answers frequently asked questions. Adding new columns or tables only requires a few changes that are flagged in annotations. The main files to customise are [`app.R`](app.R), [`server.R`](server.R), and [`ui.R`](ui.R). Most functions are saved as separate files in the [R folder](R/).
+We encourage users familiar with `R` to customise Aurora. All of the `R` scripts are well-annotated and the Launch page answers frequently asked questions. Adding new columns or tables only requires a few changes that are flagged in annotations. The main files to customise are [`app.R`](app.R), [`server.R`](server.R), and [`ui.R`](ui.r). Most functions are saved as separate files in the [R folder](R/).
 
 <p align="center">
   <img src="www/AuroraEntityRelationships.png" alt="Aurora entity relationship diagram" width="60%">
