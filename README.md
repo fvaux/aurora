@@ -77,7 +77,7 @@ We encourage users familiar with `R` to customise Aurora. All of the `.R` script
 **Alternative (Windows):** Users who have configured a desktop shortcut using [`install_desktop_icons.md`](install_desktop_icons.md) can launch Aurora directly from their desktop.
 
 ## Example data and report
-Users can switch to example data on the Launch to explore features. The example data is also available as a tab in the [aurora_queue.xlsx](Upload/aurora_queue.xlsx) file.
+Users can switch to example data on the Launch to explore features. The example data is also available as a tab in the [aurora_queue.xlsx](Upload/aurora_queue.xlsx) file. Taxonomic information for the example data is managed in [example_taxonomy.xlsx](Taxonomy/example_taxonomy.xlsx).
 
 An example report is also [available in the repository](Reports/Example_Aurora_Report.html).
 
