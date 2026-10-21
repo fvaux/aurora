@@ -39,6 +39,7 @@ mungepath <- "./mungeproofed_csvs/"
 srqpath <- "./Upload/aurora_queue.xlsx" # Location of the Aurora MS Excel file used for uploading samples
 srqsheet <- "Upload" # The name of the aurora_queue.xlsx page used for the sample upload
 taxonomypath <- "./Taxonomy/taxonomy_source.xlsx" # Location of the taxonomy source table used for broad-level taxonomic information
+exampletaxonomypath <- "./Taxonomy/example_taxonomy.xlsx" # Location of the taxonomy table for the Example data
 exportpath <- "./Export/" # File path for exported data
 reportpath <- "./Reports/" # _sFile path for reports
 
@@ -187,7 +188,7 @@ generate_taxonomy_table <- function(classification_table, taxonomypath) {
   taxonomy_table <- read_excel(taxonomypath, sheet = 1)
   
   # Create species_lookup with sample_accession, species_binomial, genus, and family
-  species_lookup <- table_SampleClassification %>%
+  species_lookup <- classification_table %>%
     transmute(
       sample_accession,
       genus,

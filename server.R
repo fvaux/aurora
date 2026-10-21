@@ -24,11 +24,35 @@ server <- function(input, output, session) {
   
   # Toggle to switch between user data and example data
   observeEvent(input$include_examples, {
+    
     # Reload the selected dataset and its modification timestamps together.
     # Note: Aurora still uses shared global tables; this is not session isolation.
     tryCatch({
+      
       loadprimarydata(table_mapping, fpath())
+      
+      # Select the appropriate taxonomy reference file
+      selected_taxonomypath <- if (isTRUE(input$include_examples)) {
+        exampletaxonomypath
+      } else {
+        taxonomypath
+      }
+      
+      # Regenerate taxonomy for the selected dataset
+      table_SampleTaxonomy <- generate_taxonomy_table(
+        table_SampleClassification,
+        selected_taxonomypath
+      )
+      
+      # Update the global taxonomy table
+      assign(
+        "table_SampleTaxonomy",
+        table_SampleTaxonomy,
+        envir = .GlobalEnv
+      )
+      
       toastr_success("Data Switched", position = "bottom-left")
+      
     }, error = function(e) {
       toastr_error(
         paste("Could not switch data:", conditionMessage(e)),

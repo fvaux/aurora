@@ -30,21 +30,13 @@ shinyApp(ui = ui, server = server) # Run this command to launch the Aurora app
 # Development to do list ====
 ## Minor tasks before manuscript submission ====
 # Check that launch page text and readme file for GitHub align with manuscript text
-# Record quick youtube tutorial and add thumbnail link to GitHub readme
 
 # Publish Zenodo release version of app (v1.0)
 # Update date and version at top of this file to match GitHub
 
-# If accepted: update publication details in this file and UI.
-
-## Shortcut ====
-# Could to make .bat Windows shortcut file
-# Using free SY Aurora vessel photo from Wikimedia Commons?
+# If accepted: update publication details in this file, server (report), and UI.
 
 ## Check for possible bugs ====
 #  ⚠️ Need to check order of operations/how report_data formed. 
 # e.g. Had to  add date formation into generate_export_data(), instead of relying on launch's own getdate()
 # Also, this step means that date columns are in different order to default.cols 
-
-#  🚨 report_data does not have taxonomy information for the ***Example data***
-# Maybe an order of operations issue with taxonomy on report_data?
